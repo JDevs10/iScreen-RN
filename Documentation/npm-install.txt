@@ -1,0 +1,7 @@
+npm install react-navigation
+npm install @react-navigation/native
+npm install @react-navigation/drawer
+npm install react-native-screens
+npm install react-native-paper
+npm install react-native-safe-area-context
+npm install react-native-vector-icons
