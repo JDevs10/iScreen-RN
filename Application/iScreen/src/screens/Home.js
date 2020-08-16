@@ -1,7 +1,9 @@
 import React, { Component } from 'react'
-import { StyleSheet, Text, View } from 'react-native'
 import CategoriesManager from '../Database/CategoriesManager'
 import ProduitsManager from '../Database/ProduitsManager'
+import {StyleSheet, ScrollView, TouchableOpacity, View, Text, TextInput, FlatList, Image, Dimensions, Alert, ImageBackground} from  'react-native';
+import { Card, Button } from 'react-native-elements'
+import DeviceInfo from 'react-native-device-info';
 
 import { openDatabase } from 'react-native-sqlite-storage';
 var db = openDatabase({ name: 'iScreen.db' });
@@ -9,12 +11,37 @@ var db = openDatabase({ name: 'iScreen.db' });
 export default class Home extends Component {
     constructor(props){
         super(props);
+    
+        /**
+         * Returns true if the screen is in portrait mode
+         */
+        const isPortrait = () => {
+          const dim = Dimensions.get('screen');
+          return dim.height >= dim.width;
+        };
+    
+        /**
+        * Returns true of the screen is in landscape mode
+        */
+        const isLandscape = () => {
+          const dim = Dimensions.get('screen');
+          return dim.width >= dim.height;
+        };
+
         this.state = {
             notif: '....',
+            orientation: isPortrait() ? 'portrait' : 'landscape',
         };
+        
+        // Event Listener for orientation changes
+        Dimensions.addEventListener('change', () => {
+          this.setState({
+            orientation: isPortrait() ? 'portrait' : 'landscape'
+          });
+        });
     }
 
-    async componentDidMount(){
+    componentDidMount(){
         /*
         const cm = new CategoriesManager();
         const pm = new ProduitsManager();
@@ -47,7 +74,8 @@ export default class Home extends Component {
         });
         */
 
-        let selectQuery = await new Promise((resolve, reject) => {
+        //et selectQuery = await new Promise((resolve, reject) => {
+            /*
             db.transaction((trans) => {
                 trans.executeSql('SELECT * FROM categories', [], (trans, results) => {
                     resolve(results);
@@ -56,9 +84,21 @@ export default class Home extends Component {
                     reject(error);
                 });
             });
-        });
+            */
+           db.transaction(tx => {
+            tx.executeSql('SELECT * FROM categories', [], (tx, results) => {
+              var temp = [];
+              for (let i = 0; i < results.rows.length; ++i) {
+                temp.push(results.rows.item(i));
+              }
+              console.log('TABLE_NAME', temp)
+          
+            });
+          });
+           
+        //});
 
-        console.log('selectQuery: ', selectQuery);
+        //console.log('selectQuery: ', selectQuery);
 
         /*
         var rows = selectQuery.rows;
@@ -70,11 +110,51 @@ export default class Home extends Component {
 
     }
 
+    productSelected(item){
+        alert('json: ' + JSON.stringify(item));
+    }
 
     render() {
+        const MyDeviceWidth = Dimensions.get('window').width;
+        const MyDeviceHeight = Dimensions.get('window').height;
+        const data = [
+            {label: "Hello 1", prix: 0.99, description: "Le lorem ipsum est, en imprimerie, une suite de mots sans signification utilisée à titre provisoire pour calibrer une mise en page.", pic: require("../../img/no-img.jpg")},
+            {label: "Hello 2", prix: 0.99, description: "Le lorem ipsum est, en imprimerie, une suite de mots sans signification utilisée à titre provisoire pour calibrer une mise en page.", pic: require("../../img/loading-gif.gif")},
+            {label: "Hello 3", prix: 0.99, description: "Le lorem ipsum est, en imprimerie, une suite de mots sans signification utilisée à titre provisoire pour calibrer une mise en page.", pic: require("../../img/no-img.jpg")},
+            {label: "Hello 4", prix: 0.99, description: "Le lorem ipsum est, en imprimerie, une suite de mots sans signification utilisée à titre provisoire pour calibrer une mise en page.", pic: require("../../img/no-img.jpg")},
+            {label: "Hello 5", prix: 0.99, description: "Le lorem ipsum est, en imprimerie, une suite de mots sans signification utilisée à titre provisoire pour calibrer une mise en page.", pic: require("../../img/no-img.jpg")},
+            {label: "Hello 6", prix: 0.99, description: "Le lorem ipsum est, en imprimerie, une suite de mots sans signification utilisée à titre provisoire pour calibrer une mise en page.", pic: require("../../img/no-img.jpg")},
+        ];
         return (
             <View>
-                <Text> Notify : {this.state.notif} </Text>
+                { data.length > 0 ? 
+                    <View style={{width: MyDeviceWidth, height: MyDeviceHeight,}}>
+                        <ScrollView style={{flex: 1}}>
+                        {
+                            data.map((item, index) => (
+                                <TouchableOpacity key={index} onPress={() => this.productSelected(item)}>
+                                    <View style={{alignItems: "center", justifyContent: "center", marginTop: 20, marginBottom: 20}}>
+                                        <ImageBackground style={{width: (MyDeviceWidth * .9), height: (MyDeviceHeight * .9),}} source={item.pic}>
+                                            
+                                            <View style={{width: (MyDeviceWidth * .9), position: "absolute", padding: 40, top: 0}}>
+                                                <Text style={{fontSize: 35, fontWeight: "bold"}}>{item.label}</Text>
+                                                <Text style={{width: ((MyDeviceWidth * .9) * 0.25), fontSize: 20}}>{item.description}</Text>
+                                            </View>
+                                            <View style={{width: (MyDeviceWidth * .9), position: "absolute", padding: 10, bottom: 0, left: (MyDeviceWidth * .6)}}>
+                                                <ImageBackground style={{width: DeviceInfo.isTablet() ? 300 : 50, height: DeviceInfo.isTablet() ? 250 : 20, alignItems: "center", justifyContent: "center"}} source={require('../../img/price-tag.png')}>
+                                                    <Text style={{fontSize: 60, fontWeight: "bold"}}>{item.prix}</Text>
+                                                </ImageBackground>
+                                            </View>
+                                        </ImageBackground>
+                                    </View>
+                                </TouchableOpacity>
+                            ))
+                        }
+                        </ScrollView>
+                    </View>
+                :
+                    null
+                }
             </View>
         )
     }

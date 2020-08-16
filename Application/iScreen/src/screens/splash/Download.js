@@ -21,20 +21,23 @@ class Download extends Component {
     const token = JSON.parse(token_);
     console.log('token : ', token.token);
     
+    /*
     setTimeout(() => {
       this.setState({
         ...this.state,
         loadingNotify: 'Téléchargement des Categories...'
     });
     }, 3000);
+    */
 
-    if("Request failed with status code 404".indexOf("404") >= 0){
+    /*
+    if("Request failed with status code 404".indexOf("404") > -1){
       console.log('ok true');
     }else{
       console.log('ok false');
     }
+    */
 
-    /*
     const res = [];
 
     console.log('findCategories');
@@ -45,13 +48,15 @@ class Download extends Component {
       return val;
     });
 
+    /*
     setTimeout(() => {
         this.setState({
           ...this.state,
           loadingNotify: 'Téléchargement des Produits...' 
       });
       }, 3000);
-  
+      */
+  /*
       console.log('findProduits');
       const findProduits = new FindProduits();
       const res_2 = await findProduits.getAllProduitsFromServer(token).then(async (val) => {
@@ -60,13 +65,11 @@ class Download extends Component {
         return val;
       });
       */
-      this.props.navigation.navigate('home');
-
-      /*
+      
       res.push(res_1);
-      res.push(res_2);
+      //res.push(res_2);
 
-    const res_ = false;
+    let res_ = false;
     for(let x = 0; x < res.length; x++){
         if(res[x] == false){
             res_ = false;
@@ -74,6 +77,7 @@ class Download extends Component {
         }
         res_ = true;
     }
+
     if(res_ == true){
       setTimeout(() => {
         this.props.navigation.navigate('home');
@@ -82,7 +86,6 @@ class Download extends Component {
     }else{
       alert("Le serveur Big Data Consulting n'est pas joignable...\n");
     }
-    */
   }
 
   render() {

@@ -6,9 +6,6 @@ import ProduitsManager from '../Database/ProduitsManager';
 export default class FindProduits extends Component {
     constructor(props) {
         super(props);
-        this.state = {
-          produits: []
-        };
       }
     
 
@@ -43,11 +40,12 @@ export default class FindProduits extends Component {
             }).catch(async (error) => {
                 // handle error
                 console.log('error : ', error);
-                if (error + ''.includes(404) || error.response.status === 404) {
+                if ((error.Error+"".indexOf("404") > -1) || (error.response.status === 404)) {
+                  console.log('zzzzz');
                   ind += 1;
                   if (ind === 1) {
                       i_ = 11;
-                      console.log('Le telechargement des produits est finis');
+                      console.log('vvvvvvvvv');
                       await resolve(true);
                   }
                   await resolve(false);

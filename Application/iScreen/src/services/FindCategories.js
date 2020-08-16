@@ -6,9 +6,6 @@ import CategoriesManager from '../Database/CategoriesManager';
 export default class FindCategories extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      categories: []
-    };
   }
 
   async getAllCategoriesFromServer(token){
@@ -31,7 +28,7 @@ export default class FindCategories extends Component {
                 console.log('Status == 200');
                 console.log(response.data);
 
-                categoriesManager.INSERT_(response.data);
+                await categoriesManager.INSERT_(response.data);
                 i_++;
 
                 console.log('xxxx');
@@ -43,7 +40,7 @@ export default class FindCategories extends Component {
         }).catch(async (error) => {
             // handle error
             console.log('error : ', error);
-            if (error.response.status === 404) {
+            if ((error.Error+"".indexOf("404") > -1) || (error.response.status === 404)) {
               console.log('zzzzz');
               ind += 1;
               if (ind === 1) {
