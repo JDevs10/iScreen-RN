@@ -1,11 +1,13 @@
 import React, { Component } from 'react'
 import CategoriesManager from '../Database/CategoriesManager'
 import ProduitsManager from '../Database/ProduitsManager'
-import {StyleSheet, ScrollView, TouchableOpacity, View, Text, TextInput, FlatList, Image, Dimensions, Alert, ImageBackground} from  'react-native';
+import {StatusBar, StyleSheet, ScrollView, TouchableOpacity, View, Text, TextInput, FlatList, Image, Dimensions, Alert, ImageBackground} from  'react-native';
 import { Card, Button } from 'react-native-elements'
 import DeviceInfo from 'react-native-device-info';
 
 import { openDatabase } from 'react-native-sqlite-storage';
+import Carousel from './customs/Carousel';
+import Header from './Header/Header';
 var db = openDatabase({ name: 'iScreen.db' });
 
 export default class Home extends Component {
@@ -110,9 +112,6 @@ export default class Home extends Component {
 
     }
 
-    productSelected(item){
-        alert('json: ' + JSON.stringify(item));
-    }
 
     render() {
         const MyDeviceWidth = Dimensions.get('window').width;
@@ -127,7 +126,10 @@ export default class Home extends Component {
         ];
         return (
             <View>
-                { data.length > 0 ? 
+                {/* <StatusBar translucent={true} backgroundColor={'transparent'} barStyle="light-content"/> */}
+                <Header navigation={ this.props }/>
+                <Carousel data={data} HW={{MyDeviceWidth,MyDeviceHeight}}/>
+                {/* { data.length > 0 ? 
                     <View style={{width: MyDeviceWidth, height: MyDeviceHeight,}}>
                         <ScrollView style={{flex: 1}}>
                         {
@@ -135,7 +137,7 @@ export default class Home extends Component {
                                 <TouchableOpacity key={index} onPress={() => this.productSelected(item)}>
                                     <View style={{alignItems: "center", justifyContent: "center", marginTop: 20, marginBottom: 20}}>
                                         <ImageBackground style={{width: (MyDeviceWidth * .9), height: (MyDeviceHeight * .9),}} source={item.pic}>
-                                            
+
                                             <View style={{width: (MyDeviceWidth * .9), position: "absolute", padding: 40, top: 0}}>
                                                 <Text style={{fontSize: 35, fontWeight: "bold"}}>{item.label}</Text>
                                                 <Text style={{width: ((MyDeviceWidth * .9) * 0.25), fontSize: 20}}>{item.description}</Text>
@@ -154,7 +156,7 @@ export default class Home extends Component {
                     </View>
                 :
                     null
-                }
+                } */}
             </View>
         )
     }

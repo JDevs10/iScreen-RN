@@ -1,4 +1,7 @@
 {
   "name": "iScreen",
-  "displayName": "iScreen"
+  "displayName": "iScreen",
+  "androidNavigationBar": {
+    "visible": "immersive"
+  }
 }

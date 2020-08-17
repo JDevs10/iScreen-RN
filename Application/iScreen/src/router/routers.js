@@ -5,10 +5,11 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import Welcome from '../screens/Welcome';
 import Loading from '../screens/splash/Loading';
 import Settings_v1 from '../screens/Settings_v1';
+import Settings_v2 from '../screens/Settings_v2';
 import Download from '../screens/splash/Download';
 import Home from '../screens/Home';
 
-import { DrawerContent } from '../screens/side-bar-custom/DrawerContent';
+import DrawerContent from '../screens/side-bar-custom/DrawerContent';
 
 
 class RouterNavigation extends Component {
@@ -22,7 +23,7 @@ class RouterNavigation extends Component {
         return (
           <Drawer.Navigator drawerContent={props => <DrawerContent {...props}/>} initialRouteName="Home">
             <Drawer.Screen name="Home" component={Home} />
-            <Drawer.Screen name="Settings_v1" component={Settings_v1} />
+            <Drawer.Screen name="Settings_v2" component={Settings_v2} />
           </Drawer.Navigator>
         );
       }

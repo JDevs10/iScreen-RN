@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
-import { View, Text, Button, Image, TouchableOpacity, TextInput, Platform, StyleSheet , StatusBar, ScrollView, Alert } from 'react-native';
+import { View, Text, Switch, Button, Image, TouchableOpacity, TextInput, Platform, StyleSheet , StatusBar, ScrollView, Alert } from 'react-native';
 import MyFooter from './Footer/MyFooter';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import FontAwesome from 'react-native-vector-icons/FontAwesome5';
 import Feather from 'react-native-vector-icons/Feather';
 import Animated from 'react-native-reanimated';
 import * as Animatable from 'react-native-animatable';
@@ -14,6 +14,10 @@ export default class Settings_v2 extends Component {
     constructor(props){
         super(props);
         this.state = {
+          isShowTittle: true,
+          isShowPrice: true,
+          isFullScreen: false,
+          speed: 1, //3 seconds
           server: '',
           key: '',
           check_textInputChange_server: false,
@@ -24,6 +28,15 @@ export default class Settings_v2 extends Component {
 
 
     render() {
+        const textInputChanged_speed = (val) => {
+          if(val =! ''){
+            this.setState({
+              ...this.state,
+              speed: val,
+            });
+          }
+        }
+
         const textInputChanged_server = (val) => {
             if(val.length > this.inputServer_length){
               
@@ -164,7 +177,7 @@ export default class Settings_v2 extends Component {
         return (
             <View style={styles.container}>
 
-                <StatusBar translucent={true} backgroundColor={'transparent'} barStyle="light-content"/>
+                {/* <StatusBar translucent={true} backgroundColor={'transparent'} barStyle="light-content"/> */}
                 <View style={styles.header}>
                     <Text style={styles.text_header}>Enregistrement des configurations</Text>
                 </View>
@@ -173,19 +186,52 @@ export default class Settings_v2 extends Component {
                     style={styles.body}>
 
                     <ScrollView>
-                    
-                        <Text style={[styles.text_footer, {marginTop: 40}]}>Adresse du serveur</Text>
+                        <View style={[styles.action, {alignItems: "center"}]}>
+                          <Text style={[styles.text_footer, {marginTop: 20, marginRight: 40}]}>Affichage du titre</Text>
+                          <Switch 
+                            onValueChange={ (value) => this.setState({ isShowTittle: value })}
+                            value={ this.state.isShowTittle }
+                            />
+                        </View>
+                        
+                        <View style={[styles.action, {alignItems: "center"}]}>
+                          <Text style={[styles.text_footer, {marginTop: 20, marginRight: 40}]}>Affichage du prix</Text>
+                          <Switch 
+                            onValueChange={ (value) => this.setState({ isShowPrice: value })}
+                            value={ this.state.isShowPrice }
+                            />
+                        </View>
+                        
+                        <View style={[styles.action, {alignItems: "center"}]}>
+                          <Text style={[styles.text_footer, {marginTop: 20, marginRight: 40}]}>Mode plein ecran</Text>
+                          <Switch 
+                            onValueChange={ (value) => this.setState({ isFullScreen: value })}
+                            value={ this.state.isFullScreen }
+                            />
+                        </View>
+                        
+                        <View style={[styles.action, {alignItems: "center"}]}>
+                          <Text style={[styles.text_footer, {marginTop: 20, marginRight: 40}]}>Vitesse de glissement</Text>
+                          <TextInput 
+                              placeholder="Ex: number in seconds" 
+                              style={styles.textInput} 
+                              autoCapitalize="none"
+                              keyboardType="number-pad"
+                              value={''+this.state.speed}
+                              onChangeText={(val) => textInputChanged_speed(val)}/>
+                        </View>
 
+                        <Text style={[styles.text_footer, {marginTop: 20}]}>Serveur</Text>
                         <View style={styles.action}>
                             <FontAwesome 
                             name="server" 
                             color="#05375a" 
                             size={20}/>
                             <TextInput 
-                            placeholder="Ex: toto.com ou 127.0.0.1" 
-                            style={styles.textInput} 
-                            autoCapitalize="none"
-                            onChangeText={(val) => textInputChanged_server(val)}/>
+                              placeholder="Ex: toto.com ou 127.0.0.1" 
+                              style={styles.textInput} 
+                              autoCapitalize="none"
+                              onChangeText={(val) => textInputChanged_server(val)}/>
 
                             {this.state.check_textInputChange_server ? 
                             <Animatable.View animation="bounceIn">
@@ -199,7 +245,7 @@ export default class Settings_v2 extends Component {
                             
                         </View>
 
-                        <Text style={[styles.text_footer, {marginTop: 40}]}>Licence</Text>
+                        <Text style={[styles.text_footer, {marginTop: 20}]}>Licence</Text>
                         <View style={styles.action}>
                             <FontAwesome 
                             name="key" 
@@ -316,6 +362,10 @@ const styles = StyleSheet.create({
         color: '#05375a',
         fontSize: 18
     },
+    text_footer_: {
+      color: '#05375a',
+      fontSize: 15
+  },
     action: {
         flexDirection: 'row',
         marginTop: 10,
@@ -328,7 +378,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
         borderBottomWidth: 1,
         borderBottomColor: '#FF0000',
-        paddingBottom: 5
+        paddingBottom: 5,
     },
     textInput: {
         flex: 1,
