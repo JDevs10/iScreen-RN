@@ -12,7 +12,7 @@ const COLUMN_URL = "url";
 const create = "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + "(" +
     COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
     COLUMN_NAME + " VARCHAR(255)," +
-    COLUMN_URL + " VARCHAR(255)," +
+    COLUMN_URL + " VARCHAR(255)" +
 ")";
 
 

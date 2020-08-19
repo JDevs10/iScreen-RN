@@ -8,7 +8,9 @@ npm install react-native-vector-icons
 npm install react-native-device-info
 npm install axios
 npm install react-native-sqlite-storage
+npm install --save-dev @types/react-native-sqlite-storage
 npm install react-native-elements
+npm install react-navigation
 
 Add these dependencies in android app build.gradle : 
 implementation 'com.facebook.fresco:fresco:2.0.0'

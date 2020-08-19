@@ -18,7 +18,7 @@ const create = "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + "(" +
     COLUMN_Label + " VARCHAR(255)," +
     COLUMN_Description + "description VARCHAR(255)," +
     COLUMN_Price + " VARCHAR(255)," +
-    COLUMN_Price_ttc + " VARCHAR(255)," +
+    COLUMN_Price_ttc + " VARCHAR(255)" +
 ")";
 
 

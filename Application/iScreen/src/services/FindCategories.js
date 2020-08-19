@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { View, Text, AsyncStorage } from 'react-native';
 import axios from 'axios';
 import CategoriesManager from '../Database/CategoriesManager';
+import Database from '../Database/Database';
 
 export default class FindCategories extends Component {
   constructor(props) {
@@ -28,10 +29,12 @@ export default class FindCategories extends Component {
                 console.log('Status == 200');
                 console.log(response.data);
 
-                await categoriesManager.INSERT_(response.data);
-                i_++;
-
-                console.log('xxxx');
+                await categoriesManager.initDB();
+                const res = await categoriesManager.INSERT_(response.data);
+                if(res){
+                  i_++;
+                  console.log('xxxx');
+                }
             }else{
                 console.log('Status != 200');
                 console.log(response.data);

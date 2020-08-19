@@ -3,12 +3,15 @@ import CategoriesManager from '../Database/CategoriesManager'
 import ProduitsManager from '../Database/ProduitsManager'
 import {StatusBar, StyleSheet, ScrollView, TouchableOpacity, View, Text, TextInput, FlatList, Image, Dimensions, Alert, ImageBackground} from  'react-native';
 import { Card, Button } from 'react-native-elements'
-import DeviceInfo from 'react-native-device-info';
+import DeviceInfo from 'react-native-device-info'
+import Database from '../Database/Database'
 
 import { openDatabase } from 'react-native-sqlite-storage';
 import Carousel from './customs/Carousel';
 import Header from './Header/Header';
 var db = openDatabase({ name: 'iScreen.db' });
+
+const db_ = new Database();
 
 export default class Home extends Component {
     constructor(props){
@@ -56,7 +59,7 @@ export default class Home extends Component {
             return val;
         });
         */
-        /*
+       /*
         db.transaction(async (tx) => {
             tx.executeSql('SELECT * FROM categories', [], async (tx, results) => {
                 const rows = results.rows;
@@ -68,16 +71,12 @@ export default class Home extends Component {
                     console.log("row : ", rows.item(x));
                     categories.push(rows.item(x));
                 }
-
-                this.setState({
-                    notif: 'nbr '+categories.length+' Categories'
-                });
+                console.log('_categories_: ', categories);
             });
         });
         */
-
-        //et selectQuery = await new Promise((resolve, reject) => {
-            /*
+        /*
+        let selectQuery = new Promise((resolve, reject) => {
             db.transaction((trans) => {
                 trans.executeSql('SELECT * FROM categories', [], (trans, results) => {
                     resolve(results);
@@ -86,22 +85,10 @@ export default class Home extends Component {
                     reject(error);
                 });
             });
-            */
-           db.transaction(tx => {
-            tx.executeSql('SELECT * FROM categories', [], (tx, results) => {
-              var temp = [];
-              for (let i = 0; i < results.rows.length; ++i) {
-                temp.push(results.rows.item(i));
-              }
-              console.log('TABLE_NAME', temp)
-          
-            });
-          });
-           
-        //});
+        });
 
-        //console.log('selectQuery: ', selectQuery);
-
+        console.log('selectQuery: ', selectQuery);
+        */
         /*
         var rows = selectQuery.rows;
         for (let i = 0; i < rows.length; i++) {
@@ -109,6 +96,17 @@ export default class Home extends Component {
             console.log(item);
         }
         */
+
+        let categories = [];
+        db_.listCategory().then((data) => {
+            categories = data;
+            console.log('categories : ', categories);
+        }).catch((err) => {
+            console.log(err);
+            this.setState = {
+            isLoading: false
+            }
+        });
 
     }
 
@@ -128,7 +126,7 @@ export default class Home extends Component {
             <View>
                 {/* <StatusBar translucent={true} backgroundColor={'transparent'} barStyle="light-content"/> */}
                 <Header navigation={ this.props }/>
-                <Carousel data={data} HW={{MyDeviceWidth,MyDeviceHeight}}/>
+                <Carousel data={data} HW={{MyDeviceWidth: MyDeviceWidth, MyDeviceHeight: (MyDeviceHeight-50)}}/>
                 {/* { data.length > 0 ? 
                     <View style={{width: MyDeviceWidth, height: MyDeviceHeight,}}>
                         <ScrollView style={{flex: 1}}>

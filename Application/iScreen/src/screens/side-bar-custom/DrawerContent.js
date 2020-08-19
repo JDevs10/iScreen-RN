@@ -97,16 +97,6 @@ export default class DrawerContent extends Component {
                                 onPress={() => {alert("Nos développeurs travaillent dur sur cette fonctionnalité")}}
                             />
                         </Drawer.Section>
-                        <Drawer.Section title="Preferences">
-                            <TouchableRipple>
-                                <View style={styles.preference}>
-                                    <Text>Dark Theme</Text>
-                                    <View pointerEvents="none">
-                                        <Switch/>
-                                    </View>
-                                </View>
-                            </TouchableRipple>
-                        </Drawer.Section>
                     </View>
                 </DrawerContentScrollView>
 
@@ -119,8 +109,8 @@ export default class DrawerContent extends Component {
                         //     size={size}
                         //     />
                         // )}
-                        label="Sign Out"
-                        onPress={() => {this.disconnect()}}
+                        label="Déconnexion"
+                        onPress={() => {disconnect()}}
                     />
                 </Drawer.Section>
             </View>

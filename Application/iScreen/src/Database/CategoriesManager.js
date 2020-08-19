@@ -1,7 +1,16 @@
 import React, { Component } from 'react'
 import { Text, View } from 'react-native'
-import { openDatabase } from 'react-native-sqlite-storage';
-var db = openDatabase({ name: 'iScreen.db' });
+import SQLite from 'react-native-sqlite-storage'
+SQLite.DEBUG(true);
+SQLite.enablePromise(true);
+
+let db;
+
+const DATABASE_NAME = "iScreen.db";
+const DATABASE_VERSION = "1.0";
+const DATABASE_DISPLAY_NAME = "iScreen_db";
+const DATABASE_SIZE = "200000";
+
 
 const TABLE_NAME = "categories";
 const COLUMN_ID = "id";
@@ -26,16 +35,102 @@ const create = "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + "(" +
     COLUMN_Color + " VARCHAR(255)," +
     COLUMN_Type + " VARCHAR(255)," +
     COLUMN_Visible + " VARCHAR(255)," +
-    COLUMN_Fk_parent + " VARCHAR(255)," +
+    COLUMN_Fk_parent + " VARCHAR(255)" +
 ")";
 
 
 export default class CategoriesManager extends Component {
+    //Init database
+    async initDB() {
+        return await new Promise(async (resolve) => {
+          console.log("Plugin integrity check ...");
+          await SQLite.echoTest()
+            .then(async() => {
+                console.log("Integrity check passed ...");
+                console.log("Opening database ...");
+                await SQLite.openDatabase(
+                    DATABASE_NAME,
+                    DATABASE_VERSION,
+                    DATABASE_DISPLAY_NAME,
+                    DATABASE_SIZE
+                )
+                .then(async DB => {
+                    db = DB;
+                    console.log("Database OPEN");
+                    console.log("SQL => "+create);
+                    await db.transaction(async(tx) => {
+                        tx.executeSql(create);
+                    }).then(async() => {
+                        console.log("Table created successfully");
+                    }).catch(async error => {
+                        console.log(error);
+                    });
+                    await resolve(db);
+                })
+                .catch(async error => {
+                    console.log(error);
+                });
+            })
+            .catch(async error => {
+              console.log("echoTest failed - plugin not functional");
+            });
+        });
+    };
+
+    closeDatabase(db) {
+        if (db) {
+            console.log("Closing DB");
+            db.close()
+            .then(status => {
+              console.log("Database CLOSED");
+            })
+            .catch(error => {
+              this.errorCB(error);
+            });
+        } else {
+          console.log("Database was not OPENED");
+        }
+    };
+
+    insertCategories(dataList){
+
+    }
+
+    listCategory() {
+        return new Promise((resolve) => {
+          const categories = [];
+          this.initDB().then((db) => {
+            db.transaction((tx) => {
+              tx.executeSql('SELECT c.id, c.ref, c.label FROM categories c', []).then(([tx,results]) => {
+                console.log("Query completed");
+                var len = results.rows.length;
+                for (let i = 0; i < len; i++) {
+                  let row = results.rows.item(i);
+                  console.log(`ID: ${row.id}, label: ${row.label}`)
+                  const { id, ref, label } = row;
+                  categories.push({
+                    id,
+                    ref,
+                    label
+                  });
+                }
+                console.log(categories);
+                resolve(categories);
+              });
+            }).then((result) => {
+              this.closeDatabase(db);
+            }).catch((err) => {
+              console.log(err);
+            });
+          }).catch((err) => {
+            console.log(err);
+          });
+        });  
+    }
 
     //Create
     async CREATE_TABLE(){
         console.log("##### CREATE_TABLE #########################");
-
         return await new Promise(async (resolve) => {
             try{
                 await db.transaction(async function (txn) {
@@ -56,19 +151,19 @@ export default class CategoriesManager extends Component {
     //Insert
     async INSERT_(data_){
         console.log("##### INSERT_ #########################");
-
         console.log("inserting.... ", data_.length);
         return await new Promise(async (resolve) => {
             try{
-                await db.transaction(async (tx) => {
-                    for(let x = 0; x < data_.length; x++){
-                        const insert = "INSERT INTO " + TABLE_NAME + " ("+COLUMN_ID+", "+COLUMN_Ref+", "+COLUMN_Ref_ext+", "+COLUMN_Label+", "+COLUMN_Description+", "+COLUMN_Entity+", "+COLUMN_Color+", "+COLUMN_Type+", "+COLUMN_Visible+", "+COLUMN_Fk_parent+") VALUE (NULL, "+data_[x].ref+", "+data_[x].ref_ext+", "+data_[x].label+", "+data_[x].description+", "+data_[x].entity+", "+data_[x].color+", "+data_[x].type+", "+data_[x].visible+", "+data_[x].fk_parent+")";
+                for(let x = 0; x < data_.length; x++){
+                    await db.transaction(async (tx) => {
+                        const insert = "INSERT INTO " + TABLE_NAME + " ("+COLUMN_ID+", "+COLUMN_Ref+", "+COLUMN_Ref_ext+", "+COLUMN_Label+", "+COLUMN_Description+", "+COLUMN_Entity+", "+COLUMN_Color+", "+COLUMN_Type+", "+COLUMN_Visible+", "+COLUMN_Fk_parent+") VALUES (NULL, '"+data_[x].ref+"', '"+data_[x].ref_ext+"', '"+data_[x].label+"', '"+data_[x].description+"', '"+data_[x].entity+"', '"+data_[x].color+"', '"+data_[x].type+"', '"+data_[x].visible+"', '"+data_[x].fk_parent+"')";
                         await tx.executeSql(insert, []);
-                    }
-                    return resolve(true);
-                });
+                    });
+                }
+                return await resolve(true);
             } catch(error){
-                return resolve(false);
+                console.log("error: ", error);
+                return await resolve(false);
             }
         });
     }

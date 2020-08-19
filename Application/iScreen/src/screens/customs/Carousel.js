@@ -64,7 +64,7 @@ export default class Carousel extends Component {
                             //     source={item.pic}
                             //     style={styles.bg}/>
                             <TouchableOpacity key={index} onPress={() => this.productSelected(item)}>
-                                    <View style={{alignItems: "center", justifyContent: "center", marginTop: 20, marginBottom: 20}}>
+                                    <View style={{alignItems: "center", justifyContent: "center", marginTop: 10, marginBottom: 10}}>
                                         <ImageBackground style={{width: HW.MyDeviceWidth, height: HW.MyDeviceHeight,}} source={item.pic}>
 
                                             <View style={{width: (HW.MyDeviceWidth * .9), position: "absolute", padding: 40, top: 0}}>

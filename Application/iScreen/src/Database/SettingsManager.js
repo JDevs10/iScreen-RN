@@ -15,7 +15,7 @@ const create = "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + "(" +
     COLUMN_Produit_Aleatoir + " INT(2)," +
     COLUMN_Aleatoir_Category + " INT(2)," +
     COLUMN_Category_X + " INT(2)," +
-    COLUMN_Produit_Recente + " INT(2)," +
+    COLUMN_Produit_Recente + " INT(2)" +
 ")";
 
 
