@@ -187,17 +187,6 @@ export default class Settings_v1 extends Component {
                     <Text style={[styles.textSign, {color: '#FFF'}]}>Connexion</Text>
                   </View>
                 </TouchableOpacity>
-                  
-
-                <TouchableOpacity
-                  onPress={() => this.props.navigation.navigate('signIn')} 
-                  style={[styles.signIn, {
-                    borderColor: "#00AAFF",
-                    borderWidth: 1,
-                    marginTop: 15
-                  }]}>
-                  <Text style={[styles.textSign, {color: '#000'}]}>Se Connecter</Text>
-                </TouchableOpacity>
               </View>
             </ScrollView>
               

@@ -8,6 +8,7 @@ let HW = {
 }
 const DEVICE_WIDTH = Dimensions.get('window').width;
 const DEVICE_HEIGHT = Dimensions.get('window').height;
+let myInterval;
 
 export default class Carousel extends Component {
     scrollRef = React.createRef();
@@ -18,26 +19,35 @@ export default class Carousel extends Component {
         };
     }
 
-    componentDidMount = () => {
-        setInterval(() => {
+    componentDidMount(){
+        myInterval = setInterval(() => {
             this.setState(prev => ({selectedIndex: prev.selectedIndex === (this.props.data.length - 1) ? 0 : (prev.selectedIndex + 1)}), () => {
                 this.scrollRef.current.scrollTo({
                     animated: true,
                     y: 0,
                     x: DEVICE_WIDTH * this.state.selectedIndex
                 });
-                //console.log('selectedIndex => ' + this.state.selectedIndex);
+                console.log('selectedIndex => ' + this.state.selectedIndex);
+                console.log('x => ' + DEVICE_WIDTH * this.state.selectedIndex);
             });
-        }, 2000);
+        }, 1000);
+    }
+
+    componentWillUnmount(){
+        clearInterval(myInterval);
     }
 
     setSelectedIndex = event => {
-        //get width of the viewSize
-        const viewSize = event.nativeEvent.layoutMeasurement.width;
-        //get the current position of the scrollView
-        const contentOffSet = event.nativeEvent.contentOffSet.x;
-        const selectIndex = Math.floor(contentOffSet / viewSize);
-        this.setState({selectIndex: selectIndex});
+        try{
+            //get width of the viewSize
+            const viewSize = event.nativeEvent.layoutMeasurement.width;
+            //get the current position of the scrollView
+            const contentOffSet = event.nativeEvent.contentOffSet.x;
+            const selectIndex = Math.floor(contentOffSet / viewSize);
+            this.setState({selectIndex: selectIndex});
+        }catch(error){
+            console.log('setSelectedIndex() error : ', error);
+        }
     }
 
     productSelected(item){
@@ -48,37 +58,40 @@ export default class Carousel extends Component {
         const data = this.props.data;
         HW = this.props.HW;
         const {selectedIndex} = this.state;
-        // console.log('HW : ', HW);
 
         return (
             <View style={{height: "100%", width: "100%"}}>
                 <ScrollView 
                     horizontal= {true}
+                    centerContent={true}
+                    snapToAlignment={"center"}
+                    alwaysBounceHorizontal={true}
                     onMomentumScrollEnd={this.setSelectedIndex} 
                     ref={this.scrollRef}
                     >
                     {
                         data.map((item, index) => (
-                            // <Image 
-                            //     key={index} 
-                            //     source={item.pic}
-                            //     style={styles.bg}/>
                             <TouchableOpacity key={index} onPress={() => this.productSelected(item)}>
-                                    <View style={{alignItems: "center", justifyContent: "center", marginTop: 10, marginBottom: 10}}>
-                                        <ImageBackground style={{width: HW.MyDeviceWidth, height: HW.MyDeviceHeight,}} source={item.pic}>
+                                <View style={{alignItems: "center", justifyContent: "center", marginTop: 10, marginBottom: 10}}>
+                                    <ImageBackground style={{width: HW.MyDeviceWidth, height: HW.MyDeviceHeight,}} source={require("../../../img/no-img.jpg")}>
 
-                                            <View style={{width: (HW.MyDeviceWidth * .9), position: "absolute", padding: 40, top: 0}}>
-                                                <Text style={{fontSize: 35, fontWeight: "bold"}}>{item.label}</Text>
-                                                <Text style={{width: ((HW.MyDeviceWidth * .9) * 0.25), fontSize: 20}}>{item.description}</Text>
-                                            </View>
-                                            <View style={{width: (HW.MyDeviceWidth * .9), position: "absolute", padding: 10, bottom: 0, left: (HW.MyDeviceWidth * .6)}}>
-                                                <ImageBackground style={{width: DeviceInfo.isTablet() ? 300 : 50, height: DeviceInfo.isTablet() ? 250 : 20, alignItems: "center", justifyContent: "center"}} source={require('../../../img/price-tag.png')}>
-                                                    <Text style={{fontSize: 60, fontWeight: "bold"}}>{item.prix}</Text>
-                                                </ImageBackground>
-                                            </View>
-                                        </ImageBackground>
-                                    </View>
-                                </TouchableOpacity>
+                                        <View style={{width: (HW.MyDeviceWidth * .9), position: "absolute", padding: 40, top: 0}}>
+                                            <Text style={{fontSize: 35, fontWeight: "bold"}}>{item.label}</Text>
+                                            <Text style={{width: ((HW.MyDeviceWidth * .9) * 0.25), fontSize: 20}}>{item.description}</Text>
+                                        </View>
+                                        <View style={{width: (HW.MyDeviceWidth * .9), position: "absolute", padding: 10, bottom: 0, left: (HW.MyDeviceWidth * .6)}}>
+                                            <ImageBackground style={{width: DeviceInfo.isTablet() ? 300 : 50, height: DeviceInfo.isTablet() ? 250 : 20, alignItems: "center", justifyContent: "center"}} source={require('../../../img/price-tag.png')}>
+                                                <Text style={{fontSize: 60, fontWeight: "bold"}}>{parseFloat(item.price) * 100 / 100} €</Text>
+                                            </ImageBackground>
+                                        </View>
+                                    </ImageBackground>
+
+                                    {/* <Text>{item.label}</Text>
+                                    <Text>{item.price}</Text>
+                                    <Text>{item.description}</Text>
+                                    <Text>{item.image}</Text> */}
+                                </View>
+                            </TouchableOpacity>
                         ))
                     }
                 </ScrollView>
@@ -116,6 +129,6 @@ const styles = StyleSheet.create({
         width: 6,
         borderRadius: 3,
         margin: 5,
-        backgroundColor: "#000"
+        backgroundColor: "#fff"
     }
     });

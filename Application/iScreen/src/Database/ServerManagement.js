@@ -1,8 +1,16 @@
 //import liraries
 import React, { Component } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { openDatabase } from 'react-native-sqlite-storage';
-var db = openDatabase({ name: 'iStock.db' });
+import SQLite from 'react-native-sqlite-storage'
+SQLite.DEBUG(true);
+SQLite.enablePromise(true);
+
+let db;
+
+const DATABASE_NAME = "iScreen.db";
+const DATABASE_VERSION = "1.0";
+const DATABASE_DISPLAY_NAME = "iScreen_db";
+const DATABASE_SIZE = "200000";
 
 const TABLE_NAME = "servers";
 const COLUMN_ID = "id";
@@ -18,41 +26,67 @@ const create = "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + "(" +
 
 // create a component
 class ServerManagement extends Component {
+    //Init database
+    async initDB() {
+        return await new Promise(async (resolve) => {
+          console.log("Plugin integrity check ...");
+          await SQLite.echoTest()
+            .then(async() => {
+                console.log("Integrity check passed ...");
+                console.log("Opening database ...");
+                await SQLite.openDatabase(
+                    DATABASE_NAME,
+                    DATABASE_VERSION,
+                    DATABASE_DISPLAY_NAME,
+                    DATABASE_SIZE
+                )
+                .then(async DB => {
+                    db = DB;
+                    console.log("Database OPEN");
+                    await resolve(db);
+                })
+                .catch(async error => {
+                    console.log(error);
+                });
+            })
+            .catch(async error => {
+              console.log("echoTest failed - plugin not functional");
+            });
+        });
+    };
+
+    async closeDatabase(db) {
+        if (db) {
+            console.log("Closing DB");
+            await db.close()
+            .then(async status => {
+              console.log("Database CLOSED");
+            })
+            .catch(async error => {
+              await this.errorCB(error);
+            });
+        } else {
+          console.log("Database was not OPENED");
+        }
+    };
+
 
     //Create
     async CREATE_SERVER_TABLE(){
         console.log("##### CREATE_SERVER_TABLE #########################");
-
         return await new Promise(async (resolve) => {
             try{
                 await db.transaction(async function (txn) {
                     await txn.executeSql('DROP TABLE IF EXISTS ' + TABLE_NAME, []);
-                    await txn.executeSql(
-                        create,
-                        []
-                    );
-                    console.log("table '"+TABLE_NAME+"' Created/Existe ");
-                    return resolve(true);
+                    console.log("table '"+TABLE_NAME+"' Dropped!");
                 });
-            } catch(error){
-                return resolve(false);
-            }
-        });
-    }
-
-    //Insert an obj
-    async INSERT_SERVER_O(data_){
-        console.log("##### INSERT_SERVER - Obj #########################");
-
-        console.log("inserting.... ", data_);
-        return await new Promise(async (resolve) => {
-            try{
-                await db.transaction(async (tx) => {
-                    await tx.executeSql("INSERT INTO " + TABLE_NAME + " ("+COLUMN_ID+", "+COLUMN_NAME+", "+COLUMN_URL+") VALUE (NULL, "+data_.name+", "+data_.url+")");
-                    return resolve(true);
+                await db.transaction(async function (txn) {
+                    await txn.executeSql(create, []);
+                    console.log("table '"+TABLE_NAME+"' Created!");
                 });
+                return await resolve(true);
             } catch(error){
-                return resolve(false);
+                return await resolve(false);
             }
         });
     }
@@ -64,18 +98,12 @@ class ServerManagement extends Component {
         console.log("inserting.... ", data_.length);
         return await new Promise(async (resolve) => {
             try{
-                await db.transaction(async (tx) => {
-                    let check = 0;
-                    for(let x = 0; x < data_.length; x++){
-                        await tx.executeSql("INSERT INTO " + TABLE_NAME + " ("+COLUMN_ID+", "+COLUMN_NAME+", "+COLUMN_URL+") VALUE (NULL, "+data_[x].name+", "+data_[x].url+")");
-                        check++;
-                    }
-
-                    if(check == data_.length){
-                        return resolve(true);
-                    }
-                    return resolve(true);
-                });
+                for(let x = 0; x < data_.length; x++){
+                    await db.transaction(async (tx) => {
+                        await tx.executeSql("INSERT INTO " + TABLE_NAME + " ("+COLUMN_ID+", "+COLUMN_NAME+", "+COLUMN_URL+") VALUES (NULL, '"+data_[x].name+"', '"+data_[x].url+"')");
+                    });
+                }
+                return await resolve(true);
             } catch(error){
                 return resolve(false);
             }
@@ -87,17 +115,24 @@ class ServerManagement extends Component {
         console.log("##### GET_SERVER_BY_ID #########################");
 
         return await new Promise(async (resolve) => {
-            try{
-                await db.transaction(async (tx) => {
-                    await tx.executeSql("SELECT * FROM " + TABLE_NAME + " WHERE " + COLUMN_ID + " = " + id, [], async (tx, results) => {
-                        var temp = {};
-                        temp = results.rows.item(i);
-                        return resolve(temp);                           
-                    });
+            let server = {};
+            await db.transaction(async (tx) => {
+                await tx.executeSql('SELECT s.id, s.name, s.url FROM '+TABLE_NAME+' s WHERE s.id = '+id, []).then(async ([tx,results]) => {
+                    console.log("Query completed");
+                    var len = results.rows.length;
+                    for (let i = 0; i < len; i++) {
+                        let row = results.rows.item(i);
+                        console.log(`ID: ${row.id}, name: ${row.name}`)
+                        server = row;
+                    }
+                    console.log(server);
+                    await resolve(server);
                 });
-            } catch(error){
-                return resolve(false);
-            }
+            }).then(async (result) => {
+                await this.closeDatabase(db);
+            }).catch(async (err) => {
+                console.log(err);
+            });
         });
     }
 
@@ -106,23 +141,28 @@ class ServerManagement extends Component {
         console.log("##### GET_SERVER_LIST #########################");
 
         return await new Promise(async (resolve) => {
+            const categories = [];
             await db.transaction(async (tx) => {
-                await tx.executeSql("SELECT * FROM " + TABLE_NAME, []).then(async (tx, result) => {
-                    console.log('Query completed, found ' + result.rows.length + ' rows');
-                    
-                    let servers = [];
-                    let size = result.rows.length;
-                    for(let x = 0; x < size; x++){
-                        let row = result.rows.item(x);
-                        console.log("ID : ", row);
-                        servers.push(row);
+                await tx.executeSql('SELECT s.id, s.name, s.url FROM '+TABLE_NAME+' s', []).then(async ([tx,results]) => {
+                    console.log("Query completed");
+                    var len = results.rows.length;
+                    for (let i = 0; i < len; i++) {
+                        let row = results.rows.item(i);
+                        console.log(`ID: ${row.id}, name: ${row.name}`)
+                        const { id, name, url } = row;
+                        categories.push({
+                            id,
+                            name,
+                            url
+                        });
                     }
-                    console.log('servers : ', servers);
-                    resolve(servers);
+                    console.log(categories);
+                    await resolve(categories);
                 });
             }).then(async (result) => {
-                console.error('result : ', result);
-                resolve([]);
+                await this.closeDatabase(db);
+            }).catch(async (err) => {
+                console.log(err);
             });
         });
 

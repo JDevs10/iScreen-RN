@@ -134,20 +134,19 @@ export default class Database extends Component {
                 console.log("Query completed");
                 var len = results.rows.length;
                 for (let i = 0; i < len; i++) {
-                  let row = results.rows.item(i);
-                  console.log(`ID: ${row.id}, label: ${row.label}`)
-                  const { id, ref, label } = row;
-                  categories.push({
-                    id,
-                    ref,
-                    label
-                  });
+                    let row = results.rows.item(i);
+                    console.log(`ID: ${row.id}, label: ${row.label}`)
+                    const { id, ref, label } = row;
+                    categories.push({
+                        id,
+                        ref,
+                        label
+                    });
                 }
-                console.log(categories);
-                resolve(categories);
               });
             }).then((result) => {
-              this.closeDatabase(db);
+                this.closeDatabase(db);
+                resolve(categories);
             }).catch((err) => {
               console.log(err);
             });

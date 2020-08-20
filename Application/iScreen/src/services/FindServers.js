@@ -37,8 +37,9 @@ class FindServers extends Component {
 
                 //Sava data in db
                 const sm = new ServerManagement();
-                const res_1 = await sm.CREATE_SERVER_TABLE();
-                const res_2 = await sm.INSERT_SERVER_L(filtered_data);
+                await sm.initDB();
+                await sm.CREATE_SERVER_TABLE();
+                await sm.INSERT_SERVER_L(filtered_data);
 
                 //Save data in storage
                 AsyncStorage.setItem('server_list', JSON.stringify(filtered_data));

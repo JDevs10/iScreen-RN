@@ -3,6 +3,7 @@ import {StyleSheet, View, Text, ImageBackground, Image, StatusBar, AsyncStorage}
 import MyFooter from '../Footer/MyFooter';
 import FindCategories from '../../services/FindCategories';
 import FindProduits from '../../services/FindProduits';
+import CheckData from '../../services/CheckData';
   
 
 class Download extends Component {
@@ -10,33 +11,43 @@ class Download extends Component {
   constructor(props){
     super(props);
     this.state = {
-      loadingNotify: 'Initialiser les Téléchargements...',
+      loadingNotify: 'Initialisation...',
     };
   }
   
   async componentDidMount() {
+    await setTimeout(async () => {
+      this.setState({
+        ...this.state,
+        loadingNotify: 'Vérification des données...'
+    });
+    }, 3000);
 
+    //check if categories, products and images existe
+    const checkData = new CheckData();
+    const data_check = await checkData.checkData().then(async (val) => {
+      return await val;
+    });
+
+
+    //skipe download to home screen
+    if(data_check){
+      this.props.navigation.navigate('home');
+      return;
+    }
     //find the selected company
     const token_ = await AsyncStorage.getItem('token');
     const token = JSON.parse(token_);
     console.log('token : ', token.token);
     
-    /*
-    setTimeout(() => {
+    
+    await setTimeout(async () => {
       this.setState({
         ...this.state,
         loadingNotify: 'Téléchargement des Categories...'
     });
     }, 3000);
-    */
 
-    /*
-    if("Request failed with status code 404".indexOf("404") > -1){
-      console.log('ok true');
-    }else{
-      console.log('ok false');
-    }
-    */
 
     const res = [];
 
@@ -45,37 +56,35 @@ class Download extends Component {
     const res_1 = await findCategories.getAllCategoriesFromServer(token).then(async (val) => {
       console.log('findCategories.getAllCategoriesFromServer : ');
       console.log(val);
-      return val;
+      return await val;
     });
 
-    /*
-    setTimeout(() => {
-        this.setState({
-          ...this.state,
-          loadingNotify: 'Téléchargement des Produits...' 
-      });
-      }, 3000);
-      */
-  /*
-      console.log('findProduits');
-      const findProduits = new FindProduits();
-      const res_2 = await findProduits.getAllProduitsFromServer(token).then(async (val) => {
-        console.log('findProduits.getAllProduitsFromServer : ');
-        console.log(val);
-        return val;
-      });
-      */
+    await setTimeout(async () => {
+      this.setState({
+        ...this.state,
+        loadingNotify: 'Téléchargement des Produits...' 
+    });
+    }, 3000);
+
       
-      res.push(res_1);
-      //res.push(res_2);
+    console.log('findProduits');
+    const findProduits = new FindProduits();
+    const res_2 = await findProduits.getAllProduitsFromServer(token).then(async (val) => {
+      console.log('findProduits.getAllProduitsFromServer : ');
+      console.log(val);
+      return await val;
+    });
+    
+    await res.push(res_1);
+    await res.push(res_2);
 
     let res_ = false;
     for(let x = 0; x < res.length; x++){
-        if(res[x] == false){
-            res_ = false;
-            break;
-        }
-        res_ = true;
+      if(res[x] == false){
+          res_ = false;
+          break;
+      }
+      res_ = true;
     }
 
     if(res_ == true){

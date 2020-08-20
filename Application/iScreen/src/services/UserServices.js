@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import { View, Text, StyleSheet, Platform, AsyncStorage } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
+import ServerManagement from '../Database/ServerManagement';
 
 // create a component
 class UserServices extends Component {
@@ -16,6 +17,19 @@ class UserServices extends Component {
         console.log(account);
 
         //find the selected company
+        const sm = new ServerManagement();
+        await sm.initDB();
+        const server_list = await sm.GET_SERVER_LIST();
+
+        for(let i = 0; i < server_list.length; i++){
+            if(account.entreprise == server_list[i].name){
+                account.serverUrl = server_list[i].url;
+                break;
+            }
+        }
+
+        //find the selected company
+        /*
         const servers_ = await AsyncStorage.getItem('server_list');
         console.log('server_list : ', servers_);
 
@@ -26,6 +40,7 @@ class UserServices extends Component {
                 break;
             }
         }
+        */
 
         // console.log('end: ', account);
 

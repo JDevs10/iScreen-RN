@@ -57,6 +57,7 @@ export default class CategoriesManager extends Component {
                 .then(async DB => {
                     db = DB;
                     console.log("Database OPEN");
+                    /*
                     console.log("SQL => "+create);
                     await db.transaction(async(tx) => {
                         tx.executeSql(create);
@@ -65,6 +66,7 @@ export default class CategoriesManager extends Component {
                     }).catch(async error => {
                         console.log(error);
                     });
+                    */
                     await resolve(db);
                 })
                 .catch(async error => {
@@ -77,54 +79,46 @@ export default class CategoriesManager extends Component {
         });
     };
 
-    closeDatabase(db) {
+    async closeDatabase(db) {
         if (db) {
             console.log("Closing DB");
-            db.close()
-            .then(status => {
+            await db.close()
+            .then(async status => {
               console.log("Database CLOSED");
             })
-            .catch(error => {
-              this.errorCB(error);
+            .catch(async error => {
+              await this.errorCB(error);
             });
         } else {
           console.log("Database was not OPENED");
         }
     };
 
-    insertCategories(dataList){
-
-    }
-
-    listCategory() {
-        return new Promise((resolve) => {
+    async listCategory() {
+        return await new Promise(async (resolve) => {
           const categories = [];
-          this.initDB().then((db) => {
-            db.transaction((tx) => {
-              tx.executeSql('SELECT c.id, c.ref, c.label FROM categories c', []).then(([tx,results]) => {
+            await db.transaction(async (tx) => {
+              await tx.executeSql('SELECT c.id, c.ref, c.label FROM categories c', []).then(async ([tx,results]) => {
                 console.log("Query completed");
                 var len = results.rows.length;
                 for (let i = 0; i < len; i++) {
-                  let row = results.rows.item(i);
-                  console.log(`ID: ${row.id}, label: ${row.label}`)
-                  const { id, ref, label } = row;
-                  categories.push({
-                    id,
-                    ref,
-                    label
-                  });
+                    let row = results.rows.item(i);
+                    console.log(`ID: ${row.id}, label: ${row.label}`)
+                    const { id, ref, label } = row;
+                    categories.push({
+                        id,
+                        ref,
+                        label
+                    });
                 }
                 console.log(categories);
-                resolve(categories);
+                await resolve(categories);
               });
-            }).then((result) => {
-              this.closeDatabase(db);
-            }).catch((err) => {
+            }).then(async (result) => {
+              await this.closeDatabase(db);
+            }).catch(async (err) => {
               console.log(err);
             });
-          }).catch((err) => {
-            console.log(err);
-          });
         });  
     }
 
@@ -135,15 +129,15 @@ export default class CategoriesManager extends Component {
             try{
                 await db.transaction(async function (txn) {
                     await txn.executeSql('DROP TABLE IF EXISTS ' + TABLE_NAME, []);
-                    await txn.executeSql(
-                        create,
-                        []
-                    );
-                    console.log("table '"+TABLE_NAME+"' Created/Existe ");
-                    return resolve(true);
+                    console.log("table '"+TABLE_NAME+"' Dropped!");
                 });
+                await db.transaction(async function (txn) {
+                    await txn.executeSql(create, []);
+                    console.log("table '"+TABLE_NAME+"' Created!");
+                });
+                return await resolve(true);
             } catch(error){
-                return resolve(false);
+                return await resolve(false);
             }
         });
     }
@@ -173,18 +167,25 @@ export default class CategoriesManager extends Component {
         console.log("##### GET_BY_ID #########################");
 
         return await new Promise(async (resolve) => {
-            try{
-                await db.transaction(async (tx) => {
-                    await tx.executeSql("SELECT * FROM " + TABLE_NAME + " WHERE " + COLUMN_ID + " = " + id, [], async (tx, results) => {
-                        var temp = {};
-                        temp = results.rows.item(i);
-                        return resolve(temp);                           
-                    });
+            let categories = {};
+            await db.transaction(async (tx) => {
+                await tx.executeSql('SELECT c.id, c.ref, c.label FROM categories c where c.id = ' + id, []).then(async ([tx,results]) => {
+                    console.log("Query completed");
+                    var len = results.rows.length;
+                    for (let i = 0; i < len; i++) {
+                        let row = results.rows.item(i);
+                        console.log(`ID: ${row.id}, label: ${row.label}`)
+                        categories = row;
+                    }
+                    console.log(categories);
+                    await resolve(categories);
                 });
-            } catch(error){
-                return resolve(false);
-            }
-        });
+            }).then(async (result) => {
+                await this.closeDatabase(db);
+            }).catch(async (err) => {
+                console.log(err);
+            });
+        });  
     }
 
     // get all
@@ -192,25 +193,31 @@ export default class CategoriesManager extends Component {
         console.log("##### GET_LIST[Categories] #########################");
 
         return await new Promise(async (resolve) => {
-            await db.transaction(async (tx) => {
-                await tx.executeSql("SELECT * FROM " + TABLE_NAME, []).then(async (tx, result) => {
-                    console.log('Query completed, found ' + result.rows.length + ' rows');
-                    
-                    let categories = [];
-                    let size = result.rows.length;
-                    for(let x = 0; x < size; x++){
-                        let row = result.rows.item(x);
-                        console.log("row : ", row);
-                        categories.push(row);
-                    }
-                    console.log('categories : ', categories);
-                    await resolve(categories);
+            const categories = [];
+              await db.transaction(async (tx) => {
+                await tx.executeSql('SELECT c.id, c.ref, c.label FROM categories c', []).then(async ([tx,results]) => {
+                  console.log("Query completed");
+                  var len = results.rows.length;
+                  for (let i = 0; i < len; i++) {
+                      let row = results.rows.item(i);
+                      console.log(`ID: ${row.id}, label: ${row.label}`)
+                      const { id, ref, label } = row;
+                      categories.push({
+                          id,
+                          ref,
+                          label
+                      });
+                  }
+                  console.log(categories);
+                  await resolve(categories);
                 });
-            }).catch(async (result) => {
-                console.error('result : ', result);
+              }).then(async (result) => {
+                await this.closeDatabase(db);
+              }).catch(async (err) => {
+                console.log('err: ', err);
                 await resolve([]);
-            });
-        });
+              });
+          });
     }
 
     //Delete
@@ -220,11 +227,11 @@ export default class CategoriesManager extends Component {
         return await new Promise(async (resolve) => {
             await db.transaction(async (tx) => {
                 await tx.executeSql("DELETE FROM " + TABLE_NAME, []);
-                resolve(true);
+                return await resolve(true);
 
             }).then(async (result) => {
                 console.error('result : ', result);
-                resolve(false);
+                return await resolve(false);
             });
         });
     }

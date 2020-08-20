@@ -4,14 +4,10 @@ import ProduitsManager from '../Database/ProduitsManager'
 import {StatusBar, StyleSheet, ScrollView, TouchableOpacity, View, Text, TextInput, FlatList, Image, Dimensions, Alert, ImageBackground} from  'react-native';
 import { Card, Button } from 'react-native-elements'
 import DeviceInfo from 'react-native-device-info'
-import Database from '../Database/Database'
 
-import { openDatabase } from 'react-native-sqlite-storage';
 import Carousel from './customs/Carousel';
 import Header from './Header/Header';
-var db = openDatabase({ name: 'iScreen.db' });
 
-const db_ = new Database();
 
 export default class Home extends Component {
     constructor(props){
@@ -35,6 +31,7 @@ export default class Home extends Component {
 
         this.state = {
             notif: '....',
+            data: [],
             orientation: isPortrait() ? 'portrait' : 'landscape',
         };
         
@@ -46,115 +43,52 @@ export default class Home extends Component {
         });
     }
 
-    componentDidMount(){
-        /*
-        const cm = new CategoriesManager();
-        const pm = new ProduitsManager();
-        const cm_ = await cm.GET_LIST().then(async (val) => {
-            console.log('val', val);
-            return val;
-        });
-        const pm_ = await pm.GET_LIST().then(async (val) => {
-            console.log('val', val);
-            return val;
-        });
-        */
-       /*
-        db.transaction(async (tx) => {
-            tx.executeSql('SELECT * FROM categories', [], async (tx, results) => {
-                const rows = results.rows;
-                let categories = [];
-
-                console.log('Query completed, found ' + rows.length + ' rows');
-
-                for (let i = 0; i < rows.length; i++) {
-                    console.log("row : ", rows.item(x));
-                    categories.push(rows.item(x));
-                }
-                console.log('_categories_: ', categories);
-            });
-        });
-        */
-        /*
-        let selectQuery = new Promise((resolve, reject) => {
-            db.transaction((trans) => {
-                trans.executeSql('SELECT * FROM categories', [], (trans, results) => {
-                    resolve(results);
-
-                },(error) => {
-                    reject(error);
-                });
-            });
-        });
-
-        console.log('selectQuery: ', selectQuery);
-        */
-        /*
-        var rows = selectQuery.rows;
-        for (let i = 0; i < rows.length; i++) {
-            var item = rows.item(i);
-            console.log(item);
-        }
-        */
-
-        let categories = [];
-        db_.listCategory().then((data) => {
-            categories = data;
-            console.log('categories : ', categories);
-        }).catch((err) => {
-            console.log(err);
-            this.setState = {
-            isLoading: false
-            }
-        });
-
+    async componentDidMount(){
+        await this.getData();
     }
 
+    async getData(){
+        this.setState({notif: "Chargement des données...."})
+        const produitsManager = new ProduitsManager();
+        await produitsManager.initDB();
+        await produitsManager.GET_LIST_LIMIT(10).then(async (data_) => {
+            console.log('produitsManager.GET_LIST_LIMIT(10) : ');
+            console.log(data_.length);
+            this.setState({
+                data: data_
+            });
+        });
+    }
+
+    componentWillUnmount(){
+        this.setState({
+            notif: "componentWillUnmount....",
+            data: []
+        });
+    }
 
     render() {
         const MyDeviceWidth = Dimensions.get('window').width;
         const MyDeviceHeight = Dimensions.get('window').height;
         const data = [
-            {label: "Hello 1", prix: 0.99, description: "Le lorem ipsum est, en imprimerie, une suite de mots sans signification utilisée à titre provisoire pour calibrer une mise en page.", pic: require("../../img/no-img.jpg")},
-            {label: "Hello 2", prix: 0.99, description: "Le lorem ipsum est, en imprimerie, une suite de mots sans signification utilisée à titre provisoire pour calibrer une mise en page.", pic: require("../../img/loading-gif.gif")},
-            {label: "Hello 3", prix: 0.99, description: "Le lorem ipsum est, en imprimerie, une suite de mots sans signification utilisée à titre provisoire pour calibrer une mise en page.", pic: require("../../img/no-img.jpg")},
-            {label: "Hello 4", prix: 0.99, description: "Le lorem ipsum est, en imprimerie, une suite de mots sans signification utilisée à titre provisoire pour calibrer une mise en page.", pic: require("../../img/no-img.jpg")},
-            {label: "Hello 5", prix: 0.99, description: "Le lorem ipsum est, en imprimerie, une suite de mots sans signification utilisée à titre provisoire pour calibrer une mise en page.", pic: require("../../img/no-img.jpg")},
-            {label: "Hello 6", prix: 0.99, description: "Le lorem ipsum est, en imprimerie, une suite de mots sans signification utilisée à titre provisoire pour calibrer une mise en page.", pic: require("../../img/no-img.jpg")},
+            {label: "Hello 1", price: 0.99, description: "Le lorem ipsum est, en imprimerie, une suite de mots sans signification utilisée à titre provisoire pour calibrer une mise en page.", image: require("../../img/no-img.jpg")},
+            {label: "Hello 2", price: 0.99, description: "Le lorem ipsum est, en imprimerie, une suite de mots sans signification utilisée à titre provisoire pour calibrer une mise en page.", image: require("../../img/loading-gif.gif")},
+            {label: "Hello 3", price: 0.99, description: "Le lorem ipsum est, en imprimerie, une suite de mots sans signification utilisée à titre provisoire pour calibrer une mise en page.", image: require("../../img/no-img.jpg")},
+            {label: "Hello 4", price: 0.99, description: "Le lorem ipsum est, en imprimerie, une suite de mots sans signification utilisée à titre provisoire pour calibrer une mise en page.", image: require("../../img/no-img.jpg")},
+            {label: "Hello 5", price: 0.99, description: "Le lorem ipsum est, en imprimerie, une suite de mots sans signification utilisée à titre provisoire pour calibrer une mise en page.", image: require("../../img/no-img.jpg")},
+            {label: "Hello 6", price: 0.99, description: "Le lorem ipsum est, en imprimerie, une suite de mots sans signification utilisée à titre provisoire pour calibrer une mise en page.", image: require("../../img/no-img.jpg")},
         ];
+
         return (
             <View>
                 {/* <StatusBar translucent={true} backgroundColor={'transparent'} barStyle="light-content"/> */}
-                <Header navigation={ this.props }/>
-                <Carousel data={data} HW={{MyDeviceWidth: MyDeviceWidth, MyDeviceHeight: (MyDeviceHeight-50)}}/>
-                {/* { data.length > 0 ? 
-                    <View style={{width: MyDeviceWidth, height: MyDeviceHeight,}}>
-                        <ScrollView style={{flex: 1}}>
-                        {
-                            data.map((item, index) => (
-                                <TouchableOpacity key={index} onPress={() => this.productSelected(item)}>
-                                    <View style={{alignItems: "center", justifyContent: "center", marginTop: 20, marginBottom: 20}}>
-                                        <ImageBackground style={{width: (MyDeviceWidth * .9), height: (MyDeviceHeight * .9),}} source={item.pic}>
-
-                                            <View style={{width: (MyDeviceWidth * .9), position: "absolute", padding: 40, top: 0}}>
-                                                <Text style={{fontSize: 35, fontWeight: "bold"}}>{item.label}</Text>
-                                                <Text style={{width: ((MyDeviceWidth * .9) * 0.25), fontSize: 20}}>{item.description}</Text>
-                                            </View>
-                                            <View style={{width: (MyDeviceWidth * .9), position: "absolute", padding: 10, bottom: 0, left: (MyDeviceWidth * .6)}}>
-                                                <ImageBackground style={{width: DeviceInfo.isTablet() ? 300 : 50, height: DeviceInfo.isTablet() ? 250 : 20, alignItems: "center", justifyContent: "center"}} source={require('../../img/price-tag.png')}>
-                                                    <Text style={{fontSize: 60, fontWeight: "bold"}}>{item.prix}</Text>
-                                                </ImageBackground>
-                                            </View>
-                                        </ImageBackground>
-                                    </View>
-                                </TouchableOpacity>
-                            ))
-                        }
-                        </ScrollView>
-                    </View>
+                <Header navigation={ this.props } />
+                { this.state.data.length > 0 ? null : <Text>{this.state.notif}</Text> }
+                { this.state.data.length > 0 ? 
+                    <Carousel data={this.state.data} HW={{MyDeviceWidth: MyDeviceWidth, MyDeviceHeight: (MyDeviceHeight-50)}}/>
                 :
                     null
-                } */}
+                }
             </View>
         )
     }
