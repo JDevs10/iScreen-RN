@@ -51,8 +51,8 @@ export default class Home extends Component {
         this.setState({notif: "Chargement des données...."})
         const produitsManager = new ProduitsManager();
         await produitsManager.initDB();
-        await produitsManager.GET_LIST_LIMIT(10).then(async (data_) => {
-            console.log('produitsManager.GET_LIST_LIMIT(10) : ');
+        await produitsManager.GET_LIST_LIMIT(20).then(async (data_) => {
+            console.log('produitsManager.GET_LIST_LIMIT(20) : ');
             console.log(data_.length);
             this.setState({
                 data: data_

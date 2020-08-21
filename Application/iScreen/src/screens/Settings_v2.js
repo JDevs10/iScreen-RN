@@ -6,6 +6,7 @@ import Feather from 'react-native-vector-icons/Feather';
 import Animated from 'react-native-reanimated';
 import * as Animatable from 'react-native-animatable';
 import SettingsServices from '../services/SettingsServices';
+import SettingsManager from '../Database/SettingsManager';
 
 export default class Settings_v2 extends Component {
     inputKey_length = 24;         // needs 25 digits
@@ -14,27 +15,48 @@ export default class Settings_v2 extends Component {
     constructor(props){
         super(props);
         this.state = {
-          isShowTittle: true,
-          isShowPrice: true,
-          isFullScreen: false,
-          speed: 1, //3 seconds
-          server: '',
-          key: '',
+          autoPlay: true,
+          showTittle: true,
+          showDescription: true,
+          showPrice: true,
+          speed: '1', //3 seconds
+          server: '123.25.2.4',
+          key: '12345-12345-12345-12345-12345',
           check_textInputChange_server: false,
           check_textInputChange_key: false,
           secureKeyTextEntry: true,
         };
     }
 
+    async componentDidMount(){
+      await this._updateData();
+    }
+
+    async _updateData(){
+      const sm = new SettingsManager()
+      await sm.initDB();
+      const list = await sm.GET_SETTINGS_BY_ID(1).then(async (val) => {
+        return await val;
+      });
+      console.log('list: ', list);
+
+      this.setState({
+        autoPlay: list.autoPlay,
+        showTittle: list.isShowTittle,
+        showDescription: list.isShowDescription,
+        showPrice: list.isShowPrice,
+        speed: list.speed,
+        server: list.server,
+        key: list.key,
+      });
+    }
 
     render() {
         const textInputChanged_speed = (val) => {
-          if(val =! ''){
-            this.setState({
-              ...this.state,
-              speed: val,
-            });
-          }
+          this.setState({
+            ...this.state,
+            speed: ''+val,
+          });
         }
 
         const textInputChanged_server = (val) => {
@@ -80,6 +102,13 @@ export default class Settings_v2 extends Component {
             });
         };
 
+        const Validate_scroll_speed = (speed) => {
+          if(!/^\d+$/.test(speed)){
+            return "* La vitesse du carousel n'est pas valide => [Error:Caractères]" + speed;
+          }
+          return "true";
+        }
+
         const Validate_IpOrUrl_address = (address) =>{  
             let isIp = true;
             let isUrl = true;
@@ -113,6 +142,7 @@ export default class Settings_v2 extends Component {
         } 
       
         const Validate_key = (inputKey) =>{  
+
             let isInputKey = true;
             let isUrl = true;
             let result = "";
@@ -128,18 +158,7 @@ export default class Settings_v2 extends Component {
             }
       
             isUrl = false;
-      
-            // var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
-            //   '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
-            //   '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
-            //   '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
-            //   '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
-            //   '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
-            // if (!pattern.test(address)) {  
-            //   isUrl = false;
-            //   result += "\nOu\n* L'url '"+address+"' n'est pas au bon format!";
-            // }
-      
+
             if(!isInputKey && !isUrl){
               return result;
             }else{
@@ -148,12 +167,29 @@ export default class Settings_v2 extends Component {
         }
 
         //check passed data before sending it to iStock auth-creation module
-    const verifyData = () =>{
-
+    const verifyData = async() =>{
+      const settings = new SettingsServices();
+      const result = await settings.Save({}).then(async (val) => {
+        return await val;
+      });
+      /*
+        let errors = "";
         const data_ = {
+          autoPlay: this.state.autoPlay,
+          showTittle: this.state.showTittle,
+          showDescription: this.state.showDescription,
+          showPrice: this.state.showPrice,
+          speed: this.state.speed,
           server: this.state.server.trim(),
           key: this.state.key
         };
+
+        //console.log('data_ :', data_);
+        
+        const result_speed = Validate_scroll_speed(data_.speed);
+        if(result_speed != 'true'){
+          errors += "###############\n"+result_speed + "\n";
+        }
   
         const result_ip_url = Validate_IpOrUrl_address(data_.server);
         if(result_ip_url != 'true'){
@@ -171,7 +207,16 @@ export default class Settings_v2 extends Component {
         }
   
         const settings = new SettingsServices();
-        settings.Save(data__);
+        const result = await settings.Save(data_).then(async (val) => {
+          return await val;
+        });
+        if(result){
+          console.log('updating...');
+          this._updateData();
+        }else{
+          alert('Update faild!');
+        }
+        */
     };
 
         return (
@@ -187,26 +232,34 @@ export default class Settings_v2 extends Component {
 
                     <ScrollView>
                         <View style={[styles.action, {alignItems: "center"}]}>
+                          <Text style={[styles.text_footer, {marginTop: 20, marginRight: 40}]}>Activer le defilement</Text>
+                          <Switch 
+                            onValueChange={ (value) => this.setState({ autoPlay: value })}
+                            value={ this.state.autoPlay }
+                            />
+                        </View>
+
+                        <View style={[styles.action, {alignItems: "center"}]}>
                           <Text style={[styles.text_footer, {marginTop: 20, marginRight: 40}]}>Affichage du titre</Text>
                           <Switch 
-                            onValueChange={ (value) => this.setState({ isShowTittle: value })}
-                            value={ this.state.isShowTittle }
+                            onValueChange={ (value) => this.setState({ showTittle: value })}
+                            value={ this.state.showTittle }
+                            />
+                        </View>
+
+                        <View style={[styles.action, {alignItems: "center"}]}>
+                          <Text style={[styles.text_footer, {marginTop: 20, marginRight: 40}]}>Affichage du description</Text>
+                          <Switch 
+                            onValueChange={ (value) => this.setState({ showDescription: value })}
+                            value={ this.state.showDescription }
                             />
                         </View>
                         
                         <View style={[styles.action, {alignItems: "center"}]}>
                           <Text style={[styles.text_footer, {marginTop: 20, marginRight: 40}]}>Affichage du prix</Text>
                           <Switch 
-                            onValueChange={ (value) => this.setState({ isShowPrice: value })}
-                            value={ this.state.isShowPrice }
-                            />
-                        </View>
-                        
-                        <View style={[styles.action, {alignItems: "center"}]}>
-                          <Text style={[styles.text_footer, {marginTop: 20, marginRight: 40}]}>Mode plein ecran</Text>
-                          <Switch 
-                            onValueChange={ (value) => this.setState({ isFullScreen: value })}
-                            value={ this.state.isFullScreen }
+                            onValueChange={ (value) => this.setState({ showPrice: value })}
+                            value={ this.state.showPrice }
                             />
                         </View>
                         
@@ -231,6 +284,7 @@ export default class Settings_v2 extends Component {
                               placeholder="Ex: toto.com ou 127.0.0.1" 
                               style={styles.textInput} 
                               autoCapitalize="none"
+                              value={''+this.state.server}
                               onChangeText={(val) => textInputChanged_server(val)}/>
 
                             {this.state.check_textInputChange_server ? 
@@ -254,11 +308,10 @@ export default class Settings_v2 extends Component {
                             <TextInput 
                             placeholder="Ex: xxxx-xxxx-xxxx-xxxx-xxxx" 
                             style={styles.textInput} 
-                            autoCapitalize="none" 
+                            autoCapitalize="none"
+                            value={''+this.state.key}
                             secureTextEntry={this.state.secureKeyTextEntry ? true : false}
                             onChangeText={(val) => handleKeyChange(val)}/>
-
-                            
 
                             <View style={{flexDirection: "row"}}>
                             <View style={{paddingRight: 5}}>
@@ -300,19 +353,8 @@ export default class Settings_v2 extends Component {
                                 style={styles.signIn}
                                 onPress={() => verifyData()}>
                                 <View style={styles.signIn}>
-                                <Text style={[styles.textSign, {color: '#FFF'}]}>Enregistrer</Text>
+                                  <Text style={[styles.textSign, {color: '#FFF'}]}>Enregistrer</Text>
                                 </View>
-                            </TouchableOpacity>
-                            
-
-                            <TouchableOpacity
-                                onPress={() => end()} 
-                                style={[styles.signIn, {
-                                borderColor: "#00AAFF",
-                                borderWidth: 1,
-                                marginTop: 15
-                                }]}>
-                                <Text style={[styles.textSign, {color: '#000'}]}>Annuler</Text>
                             </TouchableOpacity>
                         </View>
                     </ScrollView>
@@ -401,6 +443,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderRadius: 10,
         borderRadius: 10,
+        backgroundColor: '#00AAFF',
     },
     textSign: {
         fontSize: 18,

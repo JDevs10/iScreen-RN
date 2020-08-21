@@ -93,6 +93,19 @@ export default class SettingsServices extends Component {
         
     }
 
+    async Save(settings){
+        return await new Promise(async (result) => {
+            console.log('settings: ', settings);
+            const sm = new SettingsManagement();
+            await sm.initDB();
+            // await sm.CREATE_SETTINGS_TABLE();
+            // await sm.INSERT_SETTINGS(settings);
+            // console.log('Settings saved!');
+            await sm.DROP_SERVER();
+            await result(true);
+        });
+    }
+
     async Save_v2(){
         let isConfig = false;
         console.log('Init app to module');

@@ -9,32 +9,26 @@ let HW = {
 const DEVICE_WIDTH = Dimensions.get('window').width;
 const DEVICE_HEIGHT = Dimensions.get('window').height;
 let myInterval;
+let autoPlay = true;
 
 export default class Carousel extends Component {
     scrollRef = React.createRef();
     constructor(props){
         super(props);
         this.state = {
+            _autoPlay: false,
+            _showTittle: true,
+            _showDescription: false,
+            _speedScroll: 2000,
+            _showPriceContainer: true,
+            _showPriceLabel: true,
             selectedIndex: 0
         };
+        
     }
 
     componentDidMount(){
-        myInterval = setInterval(() => {
-            this.setState(prev => ({selectedIndex: prev.selectedIndex === (this.props.data.length - 1) ? 0 : (prev.selectedIndex + 1)}), () => {
-                this.scrollRef.current.scrollTo({
-                    animated: true,
-                    y: 0,
-                    x: DEVICE_WIDTH * this.state.selectedIndex
-                });
-                console.log('selectedIndex => ' + this.state.selectedIndex);
-                console.log('x => ' + DEVICE_WIDTH * this.state.selectedIndex);
-            });
-        }, 1000);
-    }
-
-    componentWillUnmount(){
-        clearInterval(myInterval);
+        this.autoScroll();
     }
 
     setSelectedIndex = event => {
@@ -47,6 +41,39 @@ export default class Carousel extends Component {
             this.setState({selectIndex: selectIndex});
         }catch(error){
             console.log('setSelectedIndex() error : ', error);
+        }
+    }
+
+    autoScroll(){
+        if(this.autoPlay && this.state._autoPlay){
+            myInterval = setInterval(() => {
+                this.setState(prev => ({selectedIndex: prev.selectedIndex === (this.props.data.length - 1) ? 0 : (prev.selectedIndex + 1)}), () => {
+                    this.scrollRef.current.scrollTo({
+                        animated: true,
+                        y: 0,
+                        x: DEVICE_WIDTH * this.state.selectedIndex
+                    });
+                    console.log('selectedIndex => ' + this.state.selectedIndex);
+                    console.log('x => ' + DEVICE_WIDTH * this.state.selectedIndex);
+                });
+            }, this.state._speedScroll);
+        }
+    }
+
+    touchStart(){
+        if(myInterval && this.state._autoPlay){
+            clearInterval(myInterval);
+            myInterval = null;
+            this.autoPlay = false;
+        }
+    }
+
+    touchEnd(){
+        if(this.state._autoPlay){
+            setTimeout(async () => {
+                this.autoPlay = true;
+                this.autoScroll();
+            }, 5000);
         }
     }
 
@@ -66,6 +93,8 @@ export default class Carousel extends Component {
                     centerContent={true}
                     snapToAlignment={"center"}
                     alwaysBounceHorizontal={true}
+                    onTouchStart={this.touchStart()}
+                    onTouchEnd={this.touchEnd()}
                     onMomentumScrollEnd={this.setSelectedIndex} 
                     ref={this.scrollRef}
                     >
@@ -76,25 +105,26 @@ export default class Carousel extends Component {
                                     <ImageBackground style={{width: HW.MyDeviceWidth, height: HW.MyDeviceHeight,}} source={require("../../../img/no-img.jpg")}>
 
                                         <View style={{width: (HW.MyDeviceWidth * .9), position: "absolute", padding: 40, top: 0}}>
-                                            <Text style={{fontSize: 35, fontWeight: "bold"}}>{item.label}</Text>
-                                            <Text style={{width: ((HW.MyDeviceWidth * .9) * 0.25), fontSize: 20}}>{item.description}</Text>
+                                            {this.state._showTittle ? <Text style={{fontSize: 35, fontWeight: "bold"}}>{item.label}</Text> : null}
+                                            {this.state._showTittle ? <Text style={{width: ((HW.MyDeviceWidth * .9) * 0.25), fontSize: 20}}>{item.description}</Text> : null}     
                                         </View>
                                         <View style={{width: (HW.MyDeviceWidth * .9), position: "absolute", padding: 10, bottom: 0, left: (HW.MyDeviceWidth * .6)}}>
-                                            <ImageBackground style={{width: DeviceInfo.isTablet() ? 300 : 50, height: DeviceInfo.isTablet() ? 250 : 20, alignItems: "center", justifyContent: "center"}} source={require('../../../img/price-tag.png')}>
-                                                <Text style={{fontSize: 60, fontWeight: "bold"}}>{parseFloat(item.price) * 100 / 100} €</Text>
-                                            </ImageBackground>
+                                            { this.state._showPriceContainer && this.state._showPriceLabel ? 
+                                                <ImageBackground style={{width: DeviceInfo.isTablet() ? 300 : 50, height: DeviceInfo.isTablet() ? 250 : 20, alignItems: "center", justifyContent: "center"}} source={require('../../../img/price-tag.png')}>
+                                                    <Text style={{fontSize: 60, fontWeight: "bold"}}>{parseFloat(item.price) * 100 / 100} €</Text>
+                                                </ImageBackground>
+                                            : null}
+                                            { !this.state._showPriceContainer && this.state._showPriceLabel ? 
+                                                <Text style={{width: DeviceInfo.isTablet() ? 300 : 50, height: DeviceInfo.isTablet() ? 250 : 20, alignItems: "center", justifyContent: "center", fontSize: 60, fontWeight: "bold"}}>{parseFloat(item.price) * 100 / 100} €</Text>
+                                            : null}
                                         </View>
                                     </ImageBackground>
-
-                                    {/* <Text>{item.label}</Text>
-                                    <Text>{item.price}</Text>
-                                    <Text>{item.description}</Text>
-                                    <Text>{item.image}</Text> */}
                                 </View>
                             </TouchableOpacity>
                         ))
                     }
                 </ScrollView>
+
                 <View style={styles.circleDiv}>
                     {
                         data.map((item, index) => (

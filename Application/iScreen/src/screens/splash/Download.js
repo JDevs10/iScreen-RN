@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
-import {StyleSheet, View, Text, ImageBackground, Image, StatusBar, AsyncStorage} from  'react-native';
+import {StyleSheet, View, Text, ImageBackground, Image, StatusBar, BackHandler, Alert, AsyncStorage} from  'react-native';
 import MyFooter from '../Footer/MyFooter';
 import FindCategories from '../../services/FindCategories';
 import FindProduits from '../../services/FindProduits';
 import CheckData from '../../services/CheckData';
+import SettingsManager from '../../Database/SettingsManager';
   
 
 class Download extends Component {
@@ -14,6 +15,31 @@ class Download extends Component {
       loadingNotify: 'Initialisation...',
     };
   }
+
+  componentWillMount() {
+      BackHandler.addEventListener('hardwareBackPress', this.existPressed);
+  }
+    
+  componentWillUnmount() {
+      BackHandler.removeEventListener('hardwareBackPress', this.existPressed);
+  }
+
+  async existPressed() {
+    await Alert.alert(
+      'Configuration',
+      "Les données de configuration sont corrompues.\n"+
+      "Veuillez nettoyer le cache et les données de cette application dans son stockage.\n"+
+      "En faisant cette action, vous devrez entrer la clé de licence.",
+      [
+        {text: 'Ok', onPress: async () => await this.leaving()},
+      ],
+      { cancelable: false });
+  }
+
+  async leaving(){
+    await AsyncStorage.removeItem('token');
+    BackHandler.exitApp();
+  }
   
   async componentDidMount() {
     await setTimeout(async () => {
@@ -22,6 +48,40 @@ class Download extends Component {
         loadingNotify: 'Vérification des données...'
     });
     }, 3000);
+
+    //check settings data
+    const sm = new SettingsManager();
+    await sm.initDB();
+    const checkSettings = await sm.CHECK_DATA().then(async (val) => {
+      return await val;
+    });
+
+    //Setting check error, 
+    //insert default settings
+    //if error in insert then display message
+    if(!checkSettings){
+      const token_ = await AsyncStorage.getItem('token');
+      const token = await JSON.parse(token_);
+
+      await sm.CREATE_SETTINGS_TABLE();
+      const settings = {
+        autoPlay: false, 
+        isShowDescription: false, 
+        isShowPrice: false, 
+        isShowTittle: false, 
+        key: token.token, 
+        server: token.server, 
+        speed: 1
+      };
+      const res = await sm.INSERT_SETTINGS(settings).then(async (val) => {
+        return await val;
+      });
+
+      if(res){
+        this.existPressed();
+      }
+      
+    }
 
     //check if categories, products and images existe
     const checkData = new CheckData();
