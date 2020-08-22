@@ -5,6 +5,7 @@ import {StatusBar, StyleSheet, ScrollView, TouchableOpacity, View, Text, TextInp
 import { Card, Button } from 'react-native-elements'
 import DeviceInfo from 'react-native-device-info'
 
+import SettingsManager from '../Database/SettingsManager';
 import Carousel from './customs/Carousel';
 import Header from './Header/Header';
 
@@ -31,7 +32,9 @@ export default class Home extends Component {
 
         this.state = {
             notif: '....',
+            settings: {},
             data: [],
+            oldSettings: {},
             orientation: isPortrait() ? 'portrait' : 'landscape',
         };
         
@@ -44,6 +47,7 @@ export default class Home extends Component {
     }
 
     async componentDidMount(){
+        await this.settings();
         await this.getData();
     }
 
@@ -51,8 +55,8 @@ export default class Home extends Component {
         this.setState({notif: "Chargement des données...."})
         const produitsManager = new ProduitsManager();
         await produitsManager.initDB();
-        await produitsManager.GET_LIST_LIMIT(20).then(async (data_) => {
-            console.log('produitsManager.GET_LIST_LIMIT(20) : ');
+        await produitsManager.GET_LIST_LIMIT(30).then(async (data_) => {
+            console.log('produitsManager.GET_LIST_LIMIT(30) : ');
             console.log(data_.length);
             this.setState({
                 data: data_
@@ -60,11 +64,35 @@ export default class Home extends Component {
         });
     }
 
-    componentWillUnmount(){
-        this.setState({
-            notif: "componentWillUnmount....",
-            data: []
+    async settings(){
+        const sm = new SettingsManager()
+        await sm.initDB();
+        const _settings = await sm.GET_SETTINGS_BY_ID(1).then(async (val) => {
+            return await val;
         });
+
+        this.setState({
+            settings: {
+                autoPlay: _settings.autoPlay,
+                showTittle: _settings.isShowTittle,
+                showDescription: _settings.isShowDescription,
+                showPrice: _settings.isShowPrice,
+                speed: _settings.speed,
+                server: _settings.server,
+                key: _settings.key,
+            }
+        });
+        console.log('Home | settings: ', this.state.settings);
+    }
+
+    async settings_(){
+        const sm = new SettingsManager()
+        await sm.initDB();
+        const _settings = await sm.GET_SETTINGS_BY_ID(1).then(async (val) => {
+            return await val;
+        });
+        console.log('Home | settings: ', _settings);
+        return _settings
     }
 
     render() {
@@ -82,10 +110,10 @@ export default class Home extends Component {
         return (
             <View>
                 {/* <StatusBar translucent={true} backgroundColor={'transparent'} barStyle="light-content"/> */}
-                <Header navigation={ this.props } />
+                {/* <Header navigation={ this.props } /> */}
                 { this.state.data.length > 0 ? null : <Text>{this.state.notif}</Text> }
                 { this.state.data.length > 0 ? 
-                    <Carousel data={this.state.data} HW={{MyDeviceWidth: MyDeviceWidth, MyDeviceHeight: (MyDeviceHeight-50)}}/>
+                    <Carousel settings={this.state.settings} data={this.state.data} HW={{MyDeviceWidth: MyDeviceWidth, MyDeviceHeight: (MyDeviceHeight-50)}}/>
                 :
                     null
                 }

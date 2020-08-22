@@ -70,10 +70,16 @@ export default class Settings_v1 extends Component {
     };
 
     const verifyData = () => {
+      // const data_ = {
+      //   entreprise: this.state.entreprise.trim(),
+      //   identifiant: this.state.identifiant.trim(),
+      //   password: this.state.password
+      // };
+
       const data_ = {
-        entreprise: this.state.entreprise.trim(),
-        identifiant: this.state.identifiant.trim(),
-        password: this.state.password
+        entreprise: "bdc_v11",
+        identifiant: "admin",
+        password: "anexys1,"
       };
 
       let error_msg = "";

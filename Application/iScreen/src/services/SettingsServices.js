@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { View, Text, StyleSheet, Platform, AsyncStorage, Alert } from 'react-native'
 import axios from 'axios';
 import DeviceInfo from 'react-native-device-info';
-import SettingsManagement from '../Database/SettingsManager';
+import SettingsManager from '../Database/SettingsManager';
 
 export default class SettingsServices extends Component {
     constructor(props){
@@ -96,12 +96,12 @@ export default class SettingsServices extends Component {
     async Save(settings){
         return await new Promise(async (result) => {
             console.log('settings: ', settings);
-            const sm = new SettingsManagement();
+            const sm = new SettingsManager();
             await sm.initDB();
-            // await sm.CREATE_SETTINGS_TABLE();
-            // await sm.INSERT_SETTINGS(settings);
-            // console.log('Settings saved!');
-            await sm.DROP_SERVER();
+            await sm.CREATE_SETTINGS_TABLE();
+            await sm.INSERT_SETTINGS(settings);
+            console.log('Settings saved!');
+            //await sm.DROP_SERVER();
             await result(true);
         });
     }

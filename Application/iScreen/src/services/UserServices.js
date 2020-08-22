@@ -4,6 +4,7 @@ import axios from 'axios';
 import { View, Text, StyleSheet, Platform, AsyncStorage } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
 import ServerManagement from '../Database/ServerManagement';
+import SettingsManager from '../Database/SettingsManager';
 
 // create a component
 class UserServices extends Component {
@@ -66,6 +67,25 @@ class UserServices extends Component {
                     await AsyncStorage.setItem('token', JSON.stringify(token_));
                     //const token__ = await AsyncStorage.getItem('token');
                     console.log('token_ : ', token_);
+
+                    const sm = new SettingsManager();
+                    await sm.initDB();
+                    await sm.CREATE_SETTINGS_TABLE();
+                    const settings = {
+                        autoPlay: true, 
+                        isShowDescription: true, 
+                        isShowPrice: true, 
+                        isShowTittle: true, 
+                        key: token_.token, 
+                        server: token_.server, 
+                        speed: 2,
+                        modifyDate: Date.now()
+                    };
+                    const res = await sm.INSERT_SETTINGS(settings).then(async (val) => {
+                        console.log('INSERT_SETTINGS => val: ', val);
+                        return await val;
+                    });
+                    // await sm.closeDatabase();
 
                     await resolve(true);
                     

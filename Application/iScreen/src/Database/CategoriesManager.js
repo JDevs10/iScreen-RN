@@ -94,33 +94,6 @@ export default class CategoriesManager extends Component {
         }
     };
 
-    async listCategory() {
-        return await new Promise(async (resolve) => {
-          const categories = [];
-            await db.transaction(async (tx) => {
-              await tx.executeSql('SELECT c.id, c.ref, c.label FROM categories c', []).then(async ([tx,results]) => {
-                console.log("Query completed");
-                var len = results.rows.length;
-                for (let i = 0; i < len; i++) {
-                    let row = results.rows.item(i);
-                    console.log(`ID: ${row.id}, label: ${row.label}`)
-                    const { id, ref, label } = row;
-                    categories.push({
-                        id,
-                        ref,
-                        label
-                    });
-                }
-                console.log(categories);
-                await resolve(categories);
-              });
-            }).then(async (result) => {
-              await this.closeDatabase(db);
-            }).catch(async (err) => {
-              console.log(err);
-            });
-        });  
-    }
 
     //Create
     async CREATE_TABLE(){
@@ -174,7 +147,7 @@ export default class CategoriesManager extends Component {
                     var len = results.rows.length;
                     for (let i = 0; i < len; i++) {
                         let row = results.rows.item(i);
-                        console.log(`ID: ${row.id}, label: ${row.label}`)
+                        //console.log(`ID: ${row.id}, label: ${row.label}`)
                         categories = row;
                     }
                     console.log(categories);
@@ -200,7 +173,7 @@ export default class CategoriesManager extends Component {
                   var len = results.rows.length;
                   for (let i = 0; i < len; i++) {
                       let row = results.rows.item(i);
-                      console.log(`ID: ${row.id}, label: ${row.label}`)
+                      //console.log(`ID: ${row.id}, label: ${row.label}`)
                       const { id, ref, label } = row;
                       categories.push({
                           id,

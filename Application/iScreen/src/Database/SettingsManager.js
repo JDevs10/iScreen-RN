@@ -20,6 +20,7 @@ const COLUMN_isShowPrice = "isShowPrice";
 const COLUMN_Speed = "speed";
 const COLUMN_Server = "server";
 const COLUMN_Key = "key";
+const COLUMN_ModifyDate = "modifyDate";
 
 
 const create = "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + "(" +
@@ -30,7 +31,8 @@ const create = "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + "(" +
     COLUMN_isShowPrice + " INT(2)," +
     COLUMN_Speed + " INT(200)," +
     COLUMN_Server + " VARCHAR(255)," +
-    COLUMN_Key + " VARCHAR(255)" +
+    COLUMN_Key + " VARCHAR(255)," +
+    COLUMN_ModifyDate + " INT(255)"+
 ")";
 
 
@@ -106,7 +108,7 @@ export default class SettingsManager extends Component {
         return await new Promise(async (resolve) => {
             try{
                 await db.transaction(async (tx) => {
-                    await tx.executeSql("INSERT INTO " + TABLE_NAME + " ("+COLUMN_ID+", "+COLUMN_autoPlay+", "+COLUMN_isShowTittle+", "+COLUMN_isShowDescription+", "+COLUMN_isShowPrice+", "+COLUMN_Speed+", "+COLUMN_Server+", "+COLUMN_Key+") VALUES (1, "+(data_.autoPlay ? 1 : 0)+", "+(data_.showTittle ? 1 : 0)+", "+(data_.showDescription ? 1 : 0)+", "+(data_.showPrice ? 1 : 0)+", "+data_.speed+", '"+data_.server+"', '"+data_.key+"')");
+                    await tx.executeSql("INSERT INTO " + TABLE_NAME + " ("+COLUMN_ID+", "+COLUMN_autoPlay+", "+COLUMN_isShowTittle+", "+COLUMN_isShowDescription+", "+COLUMN_isShowPrice+", "+COLUMN_Speed+", "+COLUMN_Server+", "+COLUMN_Key+", "+COLUMN_ModifyDate+") VALUES (1, "+(data_.autoPlay ? 1 : 0)+", "+(data_.showTittle ? 1 : 0)+", "+(data_.showDescription ? 1 : 0)+", "+(data_.showPrice ? 1 : 0)+", "+data_.speed+", '"+data_.server+"', '"+data_.key+"', "+data_.modifyDate+")");
                 });
                 return await resolve(true);
             } catch(error){
@@ -122,12 +124,12 @@ export default class SettingsManager extends Component {
         return await new Promise(async (resolve) => {
             let settings = {};
             await db.transaction(async (tx) => {
-                await tx.executeSql("SELECT s."+COLUMN_ID+", s."+COLUMN_autoPlay+", s."+COLUMN_isShowTittle+", s."+COLUMN_isShowDescription+", s."+COLUMN_isShowPrice+ ", s."+COLUMN_Speed+" ,s."+COLUMN_Server+", s."+COLUMN_Key+" FROM "+TABLE_NAME+" s WHERE s."+COLUMN_ID+" = "+id, []).then(async ([tx,results]) => {
+                await tx.executeSql("SELECT s."+COLUMN_ID+", s."+COLUMN_autoPlay+", s."+COLUMN_isShowTittle+", s."+COLUMN_isShowDescription+", s."+COLUMN_isShowPrice+ ", s."+COLUMN_Speed+" ,s."+COLUMN_Server+", s."+COLUMN_Key+", s."+COLUMN_ModifyDate+" FROM "+TABLE_NAME+" s WHERE s."+COLUMN_ID+" = "+id, []).then(async ([tx,results]) => {
                     console.log("Query completed");
                     var len = results.rows.length;
                     for (let i = 0; i < len; i++) {
                         let row = results.rows.item(i);
-                        const {autoPlay, isShowTittle, isShowDescription, isShowPrice, speed, server, key} = row;
+                        const {autoPlay, isShowTittle, isShowDescription, isShowPrice, speed, server, key, modifyDate} = row;
                         settings = {
                             autoPlay: (autoPlay == 1 ? true : false), 
                             isShowTittle: (isShowTittle == 1 ? true : false), 
@@ -135,7 +137,8 @@ export default class SettingsManager extends Component {
                             isShowPrice: (isShowPrice == 1 ? true : false), 
                             speed: speed, 
                             server: server, 
-                            key: key
+                            key: key,
+                            modifyDate: modifyDate
                         };
                     }
                     console.log('settings: ', settings);
@@ -145,6 +148,7 @@ export default class SettingsManager extends Component {
                 await this.closeDatabase(db);
             }).catch(async (err) => {
                 console.log(err);
+                // await resolve({});
             });
         });
     }
@@ -161,7 +165,7 @@ export default class SettingsManager extends Component {
                     var len = results.rows.length;
                     for (let i = 0; i < len; i++) {
                         let row = results.rows.item(i);
-                        const {autoPlay, isShowTittle, isShowDescription, isShowPrice, speed, server, key} = row;
+                        const {autoPlay, isShowTittle, isShowDescription, isShowPrice, speed, server, key, modifyDate} = row;
                         settings.push({
                             autoPlay: (autoPlay == 1 ? true : false), 
                             isShowTittle: (isShowTittle == 1 ? true : false), 
@@ -169,7 +173,8 @@ export default class SettingsManager extends Component {
                             isShowPrice: (isShowPrice == 1 ? true : false), 
                             speed: speed, 
                             server: server, 
-                            key: key
+                            key: key,
+                            modifyDate: modifyDate
                         });
                     }
                     console.log(settings);
@@ -186,12 +191,20 @@ export default class SettingsManager extends Component {
     async CHECK_DATA(){        
         console.log("##### CHECK_DATA #########################");
         return await new Promise(async (resolve) => {
+            let check = '';
             await db.transaction(async (tx) => {
-                await tx.executeSql("SELECT name FROM sqlite_master WHERE type='table' AND name='"+TABLE_NAME+"'", []).then(async ([tx,results]) => {
+                await tx.executeSql("SELECT (CASE WHEN (SELECT COUNT(*) as res FROM sqlite_master WHERE type='table' AND name='"+TABLE_NAME+"') > 0 THEN 'true' ELSE 'false' END) as res", []).then(async ([tx,results]) => {
                     console.log("Query completed");
                     let row = results.rows.item(0);
                     console.log('results.row: ', row);
-                    await resolve(true);
+                    if(row.res == 'true'){
+                        check = true;
+                    }else if (row.res == 'false'){
+                        check = false;
+                    }else{
+                        check = false;
+                    }
+                    await resolve(check);
                 });
             }).then(async (result) => {
                 await this.closeDatabase(db);
@@ -208,7 +221,7 @@ export default class SettingsManager extends Component {
 
         return await new Promise(async (resolve) => {
             await db.transaction(async (tx) => {
-                await tx.executeSql("UPDATE " + TABLE_NAME + " SET "+COLUMN_autoPlay+" = "+data_.autoPlay+", "+COLUMN_isShowTittle+" = "+data_.showTittle+", "+COLUMN_isShowDescription+" = "+data_.showDescription+", "+COLUMN_isShowPrice+ " = "+data_.showPrice+", "+COLUMN_Speed+" = "+data_.speed+", "+COLUMN_Server+" = "+data_.server+", "+COLUMN_Key+" = "+data_.key+" WHERE " + COLUMN_ID + " = " + data_.id, []);
+                await tx.executeSql("UPDATE " + TABLE_NAME + " SET "+COLUMN_autoPlay+" = "+data_.autoPlay+", "+COLUMN_isShowTittle+" = "+data_.showTittle+", "+COLUMN_isShowDescription+" = "+data_.showDescription+", "+COLUMN_isShowPrice+ " = "+data_.showPrice+", "+COLUMN_Speed+" = "+data_.speed+", "+COLUMN_Server+" = "+data_.server+", "+COLUMN_Key+" = "+data_.key+", "+COLUMN_ModifyDate+" = "+data_.modifyDate+" WHERE " + COLUMN_ID + " = " + data_.id, []);
             });
             return await resolve(true);
         });

@@ -168,11 +168,6 @@ export default class Settings_v2 extends Component {
 
         //check passed data before sending it to iStock auth-creation module
     const verifyData = async() =>{
-      const settings = new SettingsServices();
-      const result = await settings.Save({}).then(async (val) => {
-        return await val;
-      });
-      /*
         let errors = "";
         const data_ = {
           autoPlay: this.state.autoPlay,
@@ -181,7 +176,8 @@ export default class Settings_v2 extends Component {
           showPrice: this.state.showPrice,
           speed: this.state.speed,
           server: this.state.server.trim(),
-          key: this.state.key
+          key: this.state.key.trim(),
+          modifyDate: Date.now()
         };
 
         //console.log('data_ :', data_);
@@ -210,13 +206,14 @@ export default class Settings_v2 extends Component {
         const result = await settings.Save(data_).then(async (val) => {
           return await val;
         });
+
         if(result){
           console.log('updating...');
           this._updateData();
+          this.props.navigation.navigate('Home');
         }else{
           alert('Update faild!');
         }
-        */
     };
 
         return (

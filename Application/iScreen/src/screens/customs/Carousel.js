@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { Text, View, StyleSheet, ScrollView, Image, Dimensions, TouchableOpacity, Alert, ImageBackground } from 'react-native'
 import DeviceInfo from 'react-native-device-info';
+import SettingsManager from '../../Database/SettingsManager';
 
 let HW = {
     MyDeviceWidth: 0,
@@ -17,18 +18,62 @@ export default class Carousel extends Component {
         super(props);
         this.state = {
             _autoPlay: false,
-            _showTittle: true,
+            _showTittle: false,
             _showDescription: false,
-            _speedScroll: 2000,
-            _showPriceContainer: true,
-            _showPriceLabel: true,
-            selectedIndex: 0
+            _speedScroll: (2 * 1000),
+            _showPriceContainer: false,
+            _showPriceLabel: false,
+            selectedIndex: 0,
+            updating: false
         };
-        
     }
 
     componentDidMount(){
+        this.updateSettings();
         this.autoScroll();
+    }
+
+    updateSettings(){
+        const settings = this.props.settings;
+        console.log('Carousel | settings : ', settings);
+        this.setState({
+            _autoPlay: settings.autoPlay,
+            _showTittle: settings.showTittle,
+            _showDescription: settings.showDescription,
+            _speedScroll: (settings.speed * 1000),
+            _showPriceContainer: settings.showPrice,
+            _showPriceLabel: settings.showPrice,
+            _modifyDate: settings.modifyDate
+        });
+    }
+
+    async _checkSettingsUpdated(){
+        if(!this.state.updating){
+            this.setState({updating: true});
+            console.log('_checkSettingsUpdated | updating....');
+
+            const sm = new SettingsManager();
+            await sm.initDB();
+            const settings = await sm.GET_SETTINGS_BY_ID(1).then(async (val) => {
+                console.log('_checkSettingsUpdated | GET_SETTINGS_BY_ID: val => ', val);
+                console.log('_checkSettingsUpdated | GET_SETTINGS_BY_ID: modifyDate => ', val.modifyDate);
+                return await val;
+            });
+
+            if(this.state._modifyDate != settings.modifyDate){
+                this.setState({
+                    _autoPlay: settings.autoPlay,
+                    _showTittle: settings.showTittle,
+                    _showDescription: settings.showDescription,
+                    _speedScroll: (settings.speed * 1000),
+                    _showPriceContainer: settings.showPrice,
+                    _showPriceLabel: settings.showPrice,
+                    _modifyDate: settings.modifyDate
+                });
+            }
+            this.setState({updating: false});
+        }
+        
     }
 
     setSelectedIndex = event => {
@@ -159,6 +204,6 @@ const styles = StyleSheet.create({
         width: 6,
         borderRadius: 3,
         margin: 5,
-        backgroundColor: "#fff"
+        backgroundColor: "#000"
     }
     });

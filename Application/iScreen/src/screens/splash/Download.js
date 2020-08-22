@@ -33,7 +33,8 @@ class Download extends Component {
       [
         {text: 'Ok', onPress: async () => await this.leaving()},
       ],
-      { cancelable: false });
+      { cancelable: false }
+    );
   }
 
   async leaving(){
@@ -42,6 +43,7 @@ class Download extends Component {
   }
   
   async componentDidMount() {
+
     await setTimeout(async () => {
       this.setState({
         ...this.state,
@@ -51,40 +53,51 @@ class Download extends Component {
 
     //check settings data
     const sm = new SettingsManager();
-    await sm.initDB();
+    await sm.initDB(); // open db
     const checkSettings = await sm.CHECK_DATA().then(async (val) => {
+      console.log('checkSettings: ', val);
       return await val;
     });
+
+    console.log('checkSettings: CHECK_DATA =====> Done!');
 
     //Setting check error, 
     //insert default settings
     //if error in insert then display message
     if(!checkSettings){
+      console.log('!checkSettings....');
       const token_ = await AsyncStorage.getItem('token');
       const token = await JSON.parse(token_);
 
+      // await sm.initDB(); // open db
       await sm.CREATE_SETTINGS_TABLE();
       const settings = {
-        autoPlay: false, 
-        isShowDescription: false, 
-        isShowPrice: false, 
-        isShowTittle: false, 
+        autoPlay: true, 
+        isShowDescription: true, 
+        isShowPrice: true, 
+        isShowTittle: true, 
         key: token.token, 
         server: token.server, 
-        speed: 1
+        speed: 2,
+        modifyDate: Date.now()
       };
       const res = await sm.INSERT_SETTINGS(settings).then(async (val) => {
+        console.log('INSERT_SETTINGS => val: ', val);
         return await val;
       });
 
-      if(res){
-        this.existPressed();
+      //await sm.closeDatabase();
+
+      if(!res){
+        await this.existPressed();
       }
       
     }
 
     //check if categories, products and images existe
     const checkData = new CheckData();
+    console.log('#######################################################');
+    console.log('##### CheckData: CheckData');
     const data_check = await checkData.checkData().then(async (val) => {
       return await val;
     });

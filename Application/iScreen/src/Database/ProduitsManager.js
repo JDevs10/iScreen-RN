@@ -74,15 +74,15 @@ export default class ProduitsManager extends Component {
         });
     };
 
-    closeDatabase(db) {
+    async closeDatabase(db) {
         if (db) {
             console.log("Closing DB");
-            db.close()
-            .then(status => {
+            await db.close()
+            .then(async status => {
               console.log("Database CLOSED");
             })
-            .catch(error => {
-              this.errorCB(error);
+            .catch(async error => {
+              await this.errorCB(error);
             });
         } else {
           console.log("Database was not OPENED");
@@ -144,9 +144,9 @@ export default class ProduitsManager extends Component {
                 await tx.executeSql('SELECT p.id, p.ref, p.label, p.description, p.price, p.image FROM products p where p.id = '+id, []).then(async ([tx,results]) => {
                     console.log("Query completed");
                     let row = results.rows.item(i);
-                    console.log(`ID: ${row.id}, label: ${row.label}`)
+                    //console.log(`ID: ${row.id}, label: ${row.label}`)
                     product = row;
-                    // console.log(products);
+                    console.log(products);
                     await resolve(product);
                 });
             }).then(async (result) => {
