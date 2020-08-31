@@ -10,7 +10,9 @@ npm install axios
 npm install react-native-sqlite-storage
 npm install --save-dev @types/react-native-sqlite-storage
 npm install react-native-elements
-npm install react-navigation
+npm install react-native-reanimated
+npm install react-native-gesture-handler
+
 
 Add these dependencies in android app build.gradle : 
 implementation 'com.facebook.fresco:fresco:2.0.0'
@@ -19,6 +21,10 @@ implementation 'com.facebook.fresco:animated-gif:2.0.0'
 // For WebP support, including animated WebP
 implementation 'com.facebook.fresco:animated-webp:2.0.0'
 implementation 'com.facebook.fresco:webpsupport:2.0.0'
+
+
+Database example :
+https://www.djamware.com/post/5caec76380aca754f7a9d1f1/react-native-tutorial-sqlite-offline-androidios-mobile-app
 
 
 
