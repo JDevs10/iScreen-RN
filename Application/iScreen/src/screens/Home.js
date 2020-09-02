@@ -49,6 +49,22 @@ export default class Home extends Component {
     async componentDidMount(){
         await this.settings();
         await this.getData();
+        console.log('Back 1');
+        this.listener = await this.props.navigation.addListener('focus', async () => {
+            // Prevent default action
+            await console.log('Back to Home screen!');
+            await this.settings();
+            await console.log('Done settings update!');
+            console.log('new settings : ', this.state.settings);
+            return;
+        });
+        console.log('Back 2');
+    }
+
+    async componentWillMount(){
+        // await this.settings();r
+        // await this.getData();
+        await this.listener.remove();
     }
 
     async getData(){

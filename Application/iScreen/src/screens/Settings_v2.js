@@ -30,7 +30,14 @@ export default class Settings_v2 extends Component {
 
     async componentDidMount(){
       await this._updateData();
+
+      // this.listener = await this.props.navigation.addListener("focus", await this._updateData());
     }
+
+    // async componentWillMount(){
+      // await this._updateData();
+      // this.listener.remove();
+    // }
 
     async _updateData(){
       const sm = new SettingsManager()

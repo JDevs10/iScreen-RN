@@ -33,6 +33,19 @@ export default class Carousel extends Component {
         this.autoScroll();
     }
 
+    componentWillUpdate(nextProps, nextState) {
+        nextState._autoPlay = nextProps.settings.autoPlay,
+        nextState._showTittle = nextProps.settings.showTittle,
+        nextState._showDescription = nextProps.settings.showDescription,
+        nextState._speedScroll = (nextProps.settings.speed * 1000),
+        nextState._showPriceContainer = nextProps.settings.showPrice,
+        nextState._showPriceLabel = nextProps.settings.showPrice,
+        nextState._modifyDate = nextProps.settings.modifyDate
+
+        console.log('nextProps : ', nextProps);
+        console.log('nextState : ', nextState);
+    }
+
     updateSettings(){
         const settings = this.props.settings;
         console.log('Carousel | settings : ', settings);
