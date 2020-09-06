@@ -132,6 +132,7 @@ class Download extends Component {
       return await val;
     });
 
+
     await setTimeout(async () => {
       this.setState({
         ...this.state,
@@ -139,7 +140,6 @@ class Download extends Component {
     });
     }, 3000);
 
-      
     console.log('findProduits');
     const findProduits = new FindProduits();
     const res_2 = await findProduits.getAllProduitsFromServer(token).then(async (val) => {
@@ -147,9 +147,26 @@ class Download extends Component {
       console.log(val);
       return await val;
     });
+
+
+    // await setTimeout(async () => {
+    //   this.setState({
+    //     ...this.state,
+    //     loadingNotify: 'Téléchargement des images...' 
+    // });
+    // }, 3000);
+
+    // console.log('findImages');
+    // const findImages = new FindImages();
+    // const res_3 = await findImages.getAllProduitsImagesFromServer(token).then(async (val) => {
+    //   console.log('findImages.getAllProduitsImagesFromServer : ');
+    //   console.log(val);
+    //   return await val;
+    // });
     
     await res.push(res_1);
     await res.push(res_2);
+    // await res.push(res_3);
 
     let res_ = false;
     for(let x = 0; x < res.length; x++){
