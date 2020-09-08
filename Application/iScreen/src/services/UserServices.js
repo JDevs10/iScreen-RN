@@ -29,78 +29,40 @@ class UserServices extends Component {
             }
         }
 
-        //find the selected company
-        /*
-        const servers_ = await AsyncStorage.getItem('server_list');
-        console.log('server_list : ', servers_);
-
-        const server = JSON.parse(servers_);
-        for(let i = 0; i < server.length; i++){
-            if(account.entreprise == server[i].name){
-                account.serverUrl = server[i].url;
-                break;
-            }
-        }
-        */
-
-        // console.log('end: ', account);
+        
+        
 
         //login
         const result = await new Promise(async (resolve) => {
-            await axios.post(`${account.serverUrl}/api/index.php/login`, 
-                {
-                    login: account.identifiant,
-                    password: account.password
-                }, 
-                { headers: { 'Accept': 'application/json' } })
-            .then(async (response) => {
-                if(response.status == 200){
-                    console.log('Status == 200');
-                    // console.log(response.data);
-                    account.key = response.data.success.token;
+            
+            //navigate to download
+            const token_ = {
+                server: account.serverUrl,
+                token: account.key
+            };
+            await AsyncStorage.setItem('token', JSON.stringify(token_));
+            //const token__ = await AsyncStorage.getItem('token');
+            console.log('token_ : ', token_);
 
-                    //navigate to download
-                    const token_ = {
-                        server: account.serverUrl,
-                        token: account.key
-                    };
-                    await AsyncStorage.setItem('token', JSON.stringify(token_));
-                    //const token__ = await AsyncStorage.getItem('token');
-                    console.log('token_ : ', token_);
-
-                    const sm = new SettingsManager();
-                    await sm.initDB();
-                    await sm.CREATE_SETTINGS_TABLE();
-                    const settings = {
-                        autoPlay: true, 
-                        isShowDescription: true, 
-                        isShowPrice: true, 
-                        isShowTittle: true, 
-                        key: token_.token, 
-                        server: token_.server, 
-                        speed: 2,
-                        modifyDate: Date.now()
-                    };
-                    const res = await sm.INSERT_SETTINGS(settings).then(async (val) => {
-                        console.log('INSERT_SETTINGS => val: ', val);
-                        return await val;
-                    });
-                    // await sm.closeDatabase();
-
-                    await resolve(true);
-                    
-                }else{
-                    console.log('Status != 200');
-                    console.log(response.data);
-                    await resolve(false);
-                }
-            }).catch(async (error) => {
-                // handle error
-                console.log('error 1 : ');
-                console.log(error);
-                console.log( error.response.request._response);
-                await resolve(false);
+            const sm = new SettingsManager();
+            await sm.initDB();
+            await sm.CREATE_SETTINGS_TABLE();
+            const settings = {
+                autoPlay: false, 
+                showDescription: true, 
+                showPrice: true, 
+                showTittle: true, 
+                key: token_.token, 
+                server: token_.server, 
+                speed: 2, 
+                modifyDate: Date.now()
+            };
+            const res = await sm.INSERT_SETTINGS(settings).then(async (val) => {
+                console.log('INSERT_SETTINGS => val: ', val);
+                return await val;
             });
+
+            await resolve(true);
         });
 
         if(result){

@@ -199,6 +199,19 @@ class ServerManagement extends Component {
             });
         });
     }
+
+    //Delete
+    async DROP_SERVER(){
+        console.log("##### DELETE_SERVER_LIST #########################");
+
+        return await new Promise(async (resolve) => {
+            await db.transaction(async function (txn) {
+                await txn.executeSql('DROP TABLE IF EXISTS ' + TABLE_NAME, []);
+                console.log("table '"+TABLE_NAME+"' Dropped!");
+            });
+            return await resolve(true);
+        });
+    }
 }
 
 //make this component available to the app

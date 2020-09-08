@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, AsyncStorage, Text, Switch, Button, Image, TouchableOpacity, TextInput, Platform, StyleSheet , StatusBar, ScrollView, Alert } from 'react-native';
+import { View, AsyncStorage, Text, Switch, Button, Image, ImageBackground, TouchableOpacity, TextInput, Platform, StyleSheet , StatusBar, ScrollView, Alert } from 'react-native';
 import MyFooter from './Footer/MyFooter';
 import FontAwesome from 'react-native-vector-icons/FontAwesome5';
 import Feather from 'react-native-vector-icons/Feather';
@@ -8,6 +8,9 @@ import * as Animatable from 'react-native-animatable';
 import SettingsServices from '../services/SettingsServices';
 import SettingsManager from '../Database/SettingsManager';
 import FindImages from '../services/FindImages';
+
+var RNFS = require('react-native-fs');
+
 
 export default class Settings_v2 extends Component {
     inputKey_length = 24;         // needs 25 digits
@@ -26,20 +29,12 @@ export default class Settings_v2 extends Component {
           check_textInputChange_server: false,
           check_textInputChange_key: false,
           secureKeyTextEntry: true,
-          image: 'file:///data/user/0/com.iscreen/files/iScreen/produits/images/PRO-9999999.jpg',
         };
     }
 
     async componentDidMount(){
       await this._updateData();
-
-      // this.listener = await this.props.navigation.addListener("focus", await this._updateData());
     }
-
-    // async componentWillMount(){
-      // await this._updateData();
-      // this.listener.remove();
-    // }
 
     async _updateData(){
       const sm = new SettingsManager()
@@ -210,34 +205,19 @@ export default class Settings_v2 extends Component {
           alert(errors);
           return;
         }
-
-        //find the selected company
-        const token_ = await AsyncStorage.getItem('token');
-        const token = JSON.parse(token_);
-        console.log('token : ', token.token);
-
-        console.log('findImages');
-        const findImages = new FindImages();
-        const res_3 = await findImages.getAllProduitsImagesFromServer(token).then(async (val) => {
-          console.log('findImages.getAllProduitsImagesFromServer : ');
-          console.log(val);
-          // this.setState({image: '/data/user/0/com.iscreen/files/iScreen/produits/images/PRO-9999999.jpg'});
-          this.setState({image: 'file:///data/user/0/com.iscreen/files/iScreen/produits/images/PRO-9999999.jpg'});
+  
+        const settings = new SettingsServices();
+        const result = await settings.Save(data_).then(async (val) => {
           return await val;
         });
-  
-        // const settings = new SettingsServices();
-        // const result = await settings.Save(data_).then(async (val) => {
-        //   return await val;
-        // });
 
-        // if(result){
-        //   console.log('updating...');
-        //   this._updateData();
-        //   this.props.navigation.navigate('Home');
-        // }else{
-        //   alert('Update faild!');
-        // }
+        if(result){
+          console.log('updating...');
+          this._updateData();
+          this.props.navigation.navigate('Home');
+        }else{
+          alert('Update faild!');
+        }
     };
 
         return (
@@ -378,21 +358,6 @@ export default class Settings_v2 extends Component {
                                 </View>
                             </TouchableOpacity>
                         </View>
-
-                      {this.state.image.length > 5 ? 
-                        <View>
-                          <Text>Image Found</Text>
-                          <Text>/data/data/com.iscreen/files/iScreen/produits/images/PRO-9999999.jpg</Text>
-                          <Image source={{uri: 'file://data/data/com.iscreen/files/iScreen/produits/images/PRO-9999999_.jpg'}}/>
-                          <Text>file://storage/emulated/0/iScreen/pro/Produit/001..jpg</Text>
-                          <Image source={{uri: 'file://storage/emulated/0/iScreen/pro/Produit/001..jpg'}}/>
-                          </View>
-                      :
-                        <View>
-                          <Text>Image Not Found</Text>
-                          <Text>{this.state.image}</Text>
-                        </View>
-                      }
 
                     </ScrollView>
 

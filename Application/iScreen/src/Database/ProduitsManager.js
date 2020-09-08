@@ -119,10 +119,10 @@ export default class ProduitsManager extends Component {
                     await db.transaction(async (tx) => {
                         const ref = data_[x].ref;
                         const label = data_[x].label.replace(/'/g, "''");
-                        const description = (data_[x].description.replace(/'/g, "''") == null ? '' : data_[x].description.replace(/'/g, "''"));
+                        const description = (data_[x].description == null ? '' : data_[x].description.replace(/'/g, "''"));
                         const price = data_[x].price;
                         const price_tcc = data_[x].price_tcc;
-                        const image = "../../img/no-img.jpg";
+                        const image = "";
                         const insert = "INSERT INTO " + TABLE_NAME + " ("+COLUMN_ID+", "+COLUMN_Ref+", "+COLUMN_Label+", "+COLUMN_Description+", "+COLUMN_Price+", "+COLUMN_Price_ttc+", "+COLUMN_Image+") VALUES (NULL, '"+ref+"', '"+label+"', '"+description+"', '"+price+"', '"+price_tcc+"', '"+image+"')";
                         await tx.executeSql(insert, []);
                     });
@@ -150,7 +150,7 @@ export default class ProduitsManager extends Component {
                     await resolve(product);
                 });
             }).then(async (result) => {
-                await this.closeDatabase(db);
+                //await this.closeDatabase(db);
             }).catch(async (err) => {
                 console.log(err);
             });
@@ -184,7 +184,7 @@ export default class ProduitsManager extends Component {
                     await resolve(products);
                 });
             }).then(async (result) => {
-                await this.closeDatabase(db);
+                //await this.closeDatabase(db);
             }).catch(async (err) => {
                 console.log('err: ', err);
                 await resolve([]);
@@ -219,10 +219,28 @@ export default class ProduitsManager extends Component {
                     await resolve(products);
                 });
             }).then(async (result) => {
-                await this.closeDatabase(db);
+                //await this.closeDatabase(db);
             }).catch(async (err) => {
                 console.log('err: ', err);
                 await resolve([]);
+            });
+        });
+    }
+
+    // Update image path
+    async UPDATE_IMAGE(data){
+        console.log("##### UPDATE_IMAGE #########################");
+
+        return await new Promise(async (resolve) => {
+            await db.transaction(async (tx) => {
+                console.log("UPDATE "+TABLE_NAME+" SET "+COLUMN_Image+" = '"+data.image+"' WHERE "+COLUMN_Ref+" = '" +data.ref +"'")
+                await tx.executeSql("UPDATE "+TABLE_NAME+" SET "+COLUMN_Image+" = '"+data.image+"' WHERE "+COLUMN_Ref+" = '" +data.ref +"'", []);
+
+            }).then(async (result) => {
+                await resolve(true);
+            }).catch(async (err) => {
+                console.log('err: ', err);
+                await resolve(false);
             });
         });
     }
@@ -243,4 +261,16 @@ export default class ProduitsManager extends Component {
         });
     }
 
+    //Delete
+    async DROP_SERVER(){
+        console.log("##### DELETE_SERVER_LIST #########################");
+
+        return await new Promise(async (resolve) => {
+            await db.transaction(async function (txn) {
+                await txn.executeSql('DROP TABLE IF EXISTS ' + TABLE_NAME, []);
+                console.log("table '"+TABLE_NAME+"' Dropped!");
+            });
+            return await resolve(true);
+        });
+    }
 }

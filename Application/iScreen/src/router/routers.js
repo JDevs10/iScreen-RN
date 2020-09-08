@@ -5,6 +5,7 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import Welcome from '../screens/Welcome';
 import Loading from '../screens/splash/Loading';
 import Settings_v1 from '../screens/Settings_v1';
+import Settings_v1__ from '../screens/Settings_v1__';
 import Settings_v2 from '../screens/Settings_v2';
 import Download from '../screens/splash/Download';
 import Home from '../screens/Home';
@@ -34,7 +35,7 @@ class RouterNavigation extends Component {
           welcome: Welcome,
           loading: Loading,
           download: Download,
-          settings_v1: Settings_v1,
+          settings_v1__: Settings_v1__,
           home: DrawerNavigation
         },
         {

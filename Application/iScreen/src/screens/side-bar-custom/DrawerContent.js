@@ -2,6 +2,12 @@ import React, { Component } from 'react'
 import { StyleSheet, View, Image, TouchableOpacity, BackHandler, Alert, Dimensions, AsyncStorage } from 'react-native'
 import { DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
 import { Avatar, Title, Caption, Paragraph, Drawer, Text, TouchableRipple, Switch } from 'react-native-paper';
+import SettingsManager from '../../Database/SettingsManager';
+import ServerManagement from '../../Database/ServerManagement';
+import CategoriesManager from '../../Database/CategoriesManager';
+import ProduitsManager from '../../Database/ProduitsManager';
+import FindImages from '../../services/FindImages';
+
 
 
 export default class DrawerContent extends Component {
@@ -30,11 +36,56 @@ export default class DrawerContent extends Component {
 
     async leaving(isLeaving){
         if(isLeaving == true){
-          await AsyncStorage.removeItem('token');
-          BackHandler.exitApp();
+            await AsyncStorage.removeItem('token');
+
+            const SettingsManager_ = new SettingsManager();
+            await SettingsManager_.initDB();
+            await SettingsManager_.DROP_SERVER();
+
+            const ServerManagement_ = new ServerManagement();
+            await ServerManagement_.initDB();
+            await ServerManagement_.DROP_SERVER();
+
+            const CategoriesManager_ = new CategoriesManager();
+            await CategoriesManager_.initDB();
+            await CategoriesManager_.DROP_SERVER();
+
+            const ProduitsManager_ = new ProduitsManager();
+            await ProduitsManager_.initDB();
+            await ProduitsManager_.DROP_SERVER();
+
+            BackHandler.exitApp();
         }else{
-          console.log('Cancel Pressed');
+            console.log('Cancel Pressed');
         }
+    }
+
+    download_images_alert(){
+        Alert.alert(
+            "Téléchargement des Images",
+            "Cette action risque de prendre du temps, veuillez ne pas arreter l'application durant cette opération",
+            [
+              {text: 'No', onPress: () => {}},
+              {text: 'Yes', onPress: () => this.download_images()},
+            ],
+            { cancelable: false }
+        );
+    }
+
+    async download_images(){
+        console.log('downloading.......');
+        console.log('findImages');
+        //find the selected company
+        const token_ = await AsyncStorage.getItem('token');
+        const token = JSON.parse(token_);
+        console.log('token : ', token.token);
+
+        const findImages = new FindImages();
+        const res_3 = await findImages.getAllProduitsImagesFromServer(token).then(async (val) => {
+            console.log('findImages.getAllProduitsImagesFromServer : ');
+            console.log(val);
+            return await val;
+        });
     }
 
     render() {
@@ -78,6 +129,17 @@ export default class DrawerContent extends Component {
                                 // icon={({color, size}) => (
                                 //     <Icon 
                                 //     name="account-outline" 
+                                //     color={color}
+                                //     size={size}
+                                //     />
+                                // )}
+                                label="Téléchargement des Images"
+                                onPress={() => {this.download_images_alert()}}
+                            />
+                            <DrawerItem 
+                                // icon={({color, size}) => (
+                                //     <Icon 
+                                //     name="account-check-outline" 
                                 //     color={color}
                                 //     size={size}
                                 //     />

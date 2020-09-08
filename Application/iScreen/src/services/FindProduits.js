@@ -18,7 +18,7 @@ export default class FindProduits extends Component {
     console.log('ProduitsManager', 'getAllProduitsFromServer()');
     console.log('token', token);
     
-    let i_ = 220;
+    let i_ = 0;
     let ind = 0;
 
     return await new Promise(async (resolve)=> {

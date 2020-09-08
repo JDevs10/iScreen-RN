@@ -3,8 +3,13 @@ import {StyleSheet, View, Text, ImageBackground, Image, StatusBar, BackHandler, 
 import MyFooter from '../Footer/MyFooter';
 import FindCategories from '../../services/FindCategories';
 import FindProduits from '../../services/FindProduits';
+import FindImages from '../../services/FindImages';
 import CheckData from '../../services/CheckData';
+
 import SettingsManager from '../../Database/SettingsManager';
+import ServerManagement from '../../Database/ServerManagement';
+import CategoriesManager from '../../Database/CategoriesManager';
+import ProduitsManager from '../../Database/ProduitsManager';
   
 
 class Download extends Component {
@@ -72,7 +77,7 @@ class Download extends Component {
       // await sm.initDB(); // open db
       await sm.CREATE_SETTINGS_TABLE();
       const settings = {
-        autoPlay: true, 
+        autoPlay: false, 
         isShowDescription: true, 
         isShowPrice: true, 
         isShowTittle: true, 
@@ -102,6 +107,7 @@ class Download extends Component {
       return await val;
     });
 
+    console.log('data_check : ', data_check);
 
     //skipe download to home screen
     if(data_check){
@@ -149,12 +155,12 @@ class Download extends Component {
     });
 
 
-    // await setTimeout(async () => {
-    //   this.setState({
-    //     ...this.state,
-    //     loadingNotify: 'Téléchargement des images...' 
-    // });
-    // }, 3000);
+    await setTimeout(async () => {
+      this.setState({
+        ...this.state,
+        loadingNotify: 'Téléchargement des images...' 
+      });
+    }, 3000);
 
     // console.log('findImages');
     // const findImages = new FindImages();
@@ -183,7 +189,29 @@ class Download extends Component {
         return;
       }, 2500);
     }else{
-      alert("Le serveur Big Data Consulting n'est pas joignable...\n");
+      this.setState({
+        ...this.state,
+        loadingNotify: "Le serveur Big Data Consulting n'est pas joignable..."
+      });
+
+      const SettingsManager_ = new SettingsManager();
+      await SettingsManager_.initDB();
+      await SettingsManager_.DROP_SERVER();
+
+      const ServerManagement_ = new ServerManagement();
+      await ServerManagement_.initDB();
+      await ServerManagement_.DROP_SERVER();
+
+      const CategoriesManager_ = new CategoriesManager();
+      await CategoriesManager_.initDB();
+      await CategoriesManager_.DROP_SERVER();
+
+      const ProduitsManager_ = new ProduitsManager();
+      await ProduitsManager_.initDB();
+      await ProduitsManager_.DROP_SERVER();
+
+      alert("Le serveur Big Data Consulting n'est pas joignable...");
+      
     }
   }
 

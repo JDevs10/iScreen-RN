@@ -31,17 +31,17 @@ export default class Loading extends Component {
 
     const server = new FindServers();
     const res = await server.getAllServerUrls().then(async (val) => {
-      //console.log('servers 2 : ');
-      //console.log(val);
+      // console.log('servers 2 : ');
+      // console.log(val);
       return val;
     });
 
-    //console.log('servers 3 : ');
-    //console.log(res);
+    // console.log('servers 3 : ');
+    // console.log(res);
 
     if(res == true){
       setTimeout(() => {
-        this.props.navigation.navigate('settings_v1');
+        this.props.navigation.navigate('settings_v1__');
       }, 2500);
     }else{
       alert("Le serveur Big Data Consulting n'est pas joignable...\n");

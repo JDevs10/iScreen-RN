@@ -1,8 +1,8 @@
--- Copyright (C) 2019 SuperAdmin
+-- Copyright (C) 2020 SuperAdmin
 --
--- This program is free software: you can redistribute it and/or modify
+-- This program is free software; you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
--- the Free Software Foundation, either version 3 of the License, or
+-- the Free Software Foundation; either version 3 of the License, or
 -- (at your option) any later version.
 --
 -- This program is distributed in the hope that it will be useful,
@@ -11,8 +11,9 @@
 -- GNU General Public License for more details.
 --
 -- You should have received a copy of the GNU General Public License
--- along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-- along with this program. If not, see https://www.gnu.org/licenses/.
 
-INSERT INTO llx_iscreen_myobject VALUES (
-	1, 1, 'mydata'
-);
+
+-- BEGIN MODULEBUILDER INDEXES
+ALTER TABLE llx_iscreen_myobject_extrafields ADD INDEX idx_fk_object(fk_object);
+-- END MODULEBUILDER INDEXES

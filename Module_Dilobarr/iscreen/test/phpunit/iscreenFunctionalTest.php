@@ -1,6 +1,6 @@
 <?php
 /* Copyright (C) 2007-2017 Laurent Destailleur  <eldy@users.sourceforge.net>
- * Copyright (C) 2019 SuperAdmin
+ * Copyright (C) 2020 SuperAdmin
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,11 +13,11 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /**
- * \file    test/functional/iscreenFunctionalTest.php
+ * \file    test/functional/IScreenFunctionalTest.php
  * \ingroup iscreen
  * \brief   Example Selenium test.
  *
@@ -29,7 +29,7 @@ namespace test\functional;
 use PHPUnit_Extensions_Selenium2TestCase_WebDriverException;
 
 /**
- * Class iscreenFunctionalTest
+ * Class IScreenFunctionalTest
  *
  * Requires chromedriver for Google Chrome
  * Requires geckodriver for Mozilla Firefox
@@ -41,7 +41,7 @@ use PHPUnit_Extensions_Selenium2TestCase_WebDriverException;
  *
  * @package Testiscreen
  */
-class iscreenFunctionalTest extends \PHPUnit_Extensions_Selenium2TestCase
+class IScreenFunctionalTest extends \PHPUnit_Extensions_Selenium2TestCase
 {
 	// TODO: move to a global configuration file?
 	/** @var string Base URL of the webserver under test */
@@ -69,14 +69,14 @@ class iscreenFunctionalTest extends \PHPUnit_Extensions_Selenium2TestCase
 		),
 		// Geckodriver does not keep the session at the moment?!
 		// XPath selectors also don't seem to work
-//        array(
-//            'browser' => 'Mozilla Firefox on Linux',
-//            'browserName' => 'firefox',
-//            'sessionStrategy' => 'shared',
-//            'desiredCapabilities' => array(
-//                'marionette' => true
-//            )
-//        )
+        //array(
+        //    'browser' => 'Mozilla Firefox on Linux',
+        //    'browserName' => 'firefox',
+        //    'sessionStrategy' => 'shared',
+        //    'desiredCapabilities' => array(
+        //        'marionette' => true,
+        //    ),
+        //)
 	);
 
 	/**
@@ -99,6 +99,7 @@ class iscreenFunctionalTest extends \PHPUnit_Extensions_Selenium2TestCase
 
 	/**
 	 * Global test setup
+     * @return void
 	 */
 	public static function setUpBeforeClass()
 	{
@@ -106,6 +107,7 @@ class iscreenFunctionalTest extends \PHPUnit_Extensions_Selenium2TestCase
 
 	/**
 	 * Unit test setup
+     * @return void
 	 */
 	public function setUp()
 	{
@@ -115,6 +117,7 @@ class iscreenFunctionalTest extends \PHPUnit_Extensions_Selenium2TestCase
 
 	/**
 	 * Verify pre conditions
+     * @return void
 	 */
 	protected function assertPreConditions()
 	{
@@ -122,6 +125,7 @@ class iscreenFunctionalTest extends \PHPUnit_Extensions_Selenium2TestCase
 
 	/**
 	 * Handle Dolibarr authentication
+     * @return void
 	 */
 	private function authenticate()
 	{
@@ -142,6 +146,7 @@ class iscreenFunctionalTest extends \PHPUnit_Extensions_Selenium2TestCase
 
 	/**
 	 * Test enabling developer mode
+     * @return bool
 	 */
 	public function testEnableDeveloperMode()
 	{
@@ -161,6 +166,7 @@ class iscreenFunctionalTest extends \PHPUnit_Extensions_Selenium2TestCase
 	 * Test enabling the module
 	 *
 	 * @depends testEnableDeveloperMode
+     * @return bool
 	 */
 	public function testModuleEnabled()
 	{
@@ -170,12 +176,12 @@ class iscreenFunctionalTest extends \PHPUnit_Extensions_Selenium2TestCase
 		$module_status_image = $this->byXPath($module_status_image_path);
 		if (strstr($module_status_image->attribute('src'), 'switch_off.png')) {
 			// Enable the module
-			$this->byHref('modiscreen')->click();
+			$this->byHref('modIScreen')->click();
 		} else {
 			// Disable the module
-			$this->byHref('modiscreen')->click();
+			$this->byHref('modIScreen')->click();
 			// Reenable the module
-			$this->byHref('modiscreen')->click();
+			$this->byHref('modIScreen')->click();
 		}
 		// Page reloaded, we need a new Xpath
 		$module_status_image = $this->byXPath($module_status_image_path);
@@ -186,6 +192,7 @@ class iscreenFunctionalTest extends \PHPUnit_Extensions_Selenium2TestCase
 	 * Test access to the configuration page
 	 *
 	 * @depends testModuleEnabled
+     * @return bool
 	 */
 	public function testConfigurationPage()
 	{
@@ -198,6 +205,7 @@ class iscreenFunctionalTest extends \PHPUnit_Extensions_Selenium2TestCase
 	 * Test access to the about page
 	 *
 	 * @depends testConfigurationPage
+     * @return bool
 	 */
 	public function testAboutPage()
 	{
@@ -210,12 +218,13 @@ class iscreenFunctionalTest extends \PHPUnit_Extensions_Selenium2TestCase
 	 * Test about page is rendering Markdown
 	 *
 	 * @depends testAboutPage
+     * @return bool
 	 */
 	public function testAboutPageRendersMarkdownReadme()
 	{
 		$this->url('/custom/iscreen/admin/about.php');
 		$this->authenticate();
-		return $this->assertEquals(
+        return $this->assertEquals(
 			'Dolibarr Module Template (aka My Module)',
 			$this->byTag('h1')->text(),
 			"Readme title"
@@ -226,6 +235,7 @@ class iscreenFunctionalTest extends \PHPUnit_Extensions_Selenium2TestCase
 	 * Test box is properly declared
 	 *
 	 * @depends testModuleEnabled
+     * @return bool
 	 */
 	public function testBoxDeclared()
 	{
@@ -238,13 +248,14 @@ class iscreenFunctionalTest extends \PHPUnit_Extensions_Selenium2TestCase
 	 * Test trigger is properly enabled
 	 *
 	 * @depends testModuleEnabled
+     * @return bool
 	 */
 	public function testTriggerDeclared()
 	{
 		$this->url('/admin/triggers.php');
 		$this->authenticate();
-		return $this->assertContains(
-			'interface_99_modiscreen_iscreenTriggers.class.php',
+        return $this->assertContains(
+			'interface_99_modIScreen_IScreenTriggers.class.php',
 			$this->byTag('body')->text(),
 			"Trigger declared"
 		);
@@ -254,20 +265,22 @@ class iscreenFunctionalTest extends \PHPUnit_Extensions_Selenium2TestCase
 	 * Test trigger is properly declared
 	 *
 	 * @depends testTriggerDeclared
+     * @return bool
 	 */
 	public function testTriggerEnabled()
 	{
 		$this->url('/admin/triggers.php');
 		$this->authenticate();
-		return $this->assertContains(
+        return $this->assertContains(
 			'tick.png',
-			$this->byXPath('//td[text()="interface_99_modiscreen_MyTrigger.class.php"]/following::img')->attribute('src'),
+			$this->byXPath('//td[text()="interface_99_modIScreen_MyTrigger.class.php"]/following::img')->attribute('src'),
 			"Trigger enabled"
 		);
 	}
 
 	/**
 	 * Verify post conditions
+     * @return void
 	 */
 	protected function assertPostConditions()
 	{
@@ -275,6 +288,7 @@ class iscreenFunctionalTest extends \PHPUnit_Extensions_Selenium2TestCase
 
 	/**
 	 * Unit test teardown
+     * @return void
 	 */
 	public function tearDown()
 	{
@@ -282,6 +296,7 @@ class iscreenFunctionalTest extends \PHPUnit_Extensions_Selenium2TestCase
 
 	/**
 	 * Global test teardown
+     * @return void
 	 */
 	public static function tearDownAfterClass()
 	{

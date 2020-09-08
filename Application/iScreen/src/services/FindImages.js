@@ -1,8 +1,12 @@
 import React, { Component } from 'react'
-import { Text, View } from 'react-native'
+import { Text, View, AsyncStorage } from 'react-native'
 import axios from 'axios';
 import RNBackgroundDownloader from 'react-native-background-downloader';
 import ProduitsManager from '../Database/ProduitsManager';
+
+const RNFS = require('react-native-fs');
+const IMAGE_PATH = RNFS.DocumentDirectoryPath + '/iScreen/produits/images';
+const PREFIX = "jpg";
 
 export default class FindImages extends Component {
     constructor(props) {
@@ -15,121 +19,86 @@ export default class FindImages extends Component {
     }
 
     async getAllProduitsImagesFromServer(token){
+        let result = false;
         const produitsManager = new ProduitsManager();
         await produitsManager.initDB();
-        await produitsManager.CREATE_TABLE();
-    
-        //const token = await AsyncStorage.getItem('token');
-        console.log('ProduitsManager', 'getAllProduitsImagesFromServer()');
-        console.log('token', token);
         
+        // get a list of products
+        const productList = await produitsManager.GET_LIST().then(async (value) => {
+            return await value;
+        });
+        console.log("productList => "+productList.length);
         
-        //get image from server
-        let result = "";
-        var RNFS = require('react-native-fs');
-        const ImagesPath = RNFS.DocumentDirectoryPath + '/iScreen/produits/images/';
-        console.log('ImagesPath : ', ImagesPath);
-        console.log('======>  file://' + RNFS.DocumentDirectoryPath + '/iScreen/produits/images/my.png')
-        
-        await RNFS.unlink(ImagesPath)
-            .then(async () => {
-                console.log('OLD Repertory deleted');
-            })
-            .catch((err) => {
-                console.log(err.message);
-            });
-        await RNFS.mkdir(ImagesPath).then(async (success) => {
-            let lg = this.state.RefData.length;
-            for (let i = 0; i < lg; i++) {
-                console.log(`url => ${token.server}/api/ryimg/product_v2.php?server=${token.server}&DOLAPIKEY=${token.token}&modulepart=product&ref=${this.state.RefData[i].ref}`);
-
-                RNBackgroundDownloader.download({
-                    id: String(i),
-                    url: `${token.server}/api/ryimg/product_v2.php?server=${token.server}&DOLAPIKEY=${token.token}&modulepart=product&ref=${this.state.RefData[i].ref}`,
-                    destination: `${RNFS.DocumentDirectoryPath}/iScreen/produits/images/${this.state.RefData[i].ref}.jpg`,
-                    headers: {
-                        DOLAPIKEY: token.token,
-                        Accept: 'application/json',
-                    }
-                }).begin(async (expectedBytes) => {
-                    console.log(`Going to download ${expectedBytes} bytes!`);
-
-                    if (expectedBytes <= 100) {
-                        console.log('Image : ' + i + ' - ' + this.state.RefData[i].ref + ' <= EMPTY [WILL BE DELETED]');
-                        await RNFS.unlink(RNFS.DocumentDirectoryPath + '/iScreen/produits/images/' + this.state.RefData[i].ref + '.jpg');
-                    }
-                }).done(async () => {
-                    console.log(`${RNFS.DocumentDirectoryPath}/iScreen/produits/images/${this.state.RefData[i].ref}.jpg`);
-                    result = `${RNFS.DocumentDirectoryPath}/iScreen/produits/images/${this.state.RefData[i].ref}.jpg`;
-                    console.log('Image : ' + i + ' - ' + this.state.RefData[i].ref + ' => DOWNLOADED');
-                }).error(async (error) => {
-                    console.log('error');
-                    if ((lg - 1) === i) {
-                        console.log('telechargement complet');
-                        this.props.navigation.navigate('Dashboard');
-                    }
+        if(productList.length > 0){
+            // get image from server
+            // and save on devices then update image file location in db
+            
+            console.log('IMAGE_PATH : ', IMAGE_PATH);
+            
+            await RNFS.unlink(IMAGE_PATH)
+                .then(async () => {
+                    console.log('OLD Repertory deleted');
+                })
+                .catch(async (err) => {
+                    console.log(err.message);
                 });
-            }
-        });
+            await RNFS.mkdir(IMAGE_PATH).then(async (success) => {
+                let isDone = false;
+                let lg = productList.length;
+                for (let i = (lg-150); i < lg; i++) {
+                    let expectedBytes__ = 0;
+                    console.log(`url => ${token.server}/api/ryimg/product_v2.php?server=${token.server}&DOLAPIKEY=${token.token}&modulepart=product&ref=${productList[i].ref}`);
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                    await RNBackgroundDownloader.download({
+                        id: String(i),
+                        url: `${token.server}/api/ryimg/product_v2.php?server=${token.server}&DOLAPIKEY=${token.token}&modulepart=product&ref=${productList[i].ref}`,
+                        destination: `${IMAGE_PATH}/${productList[i].ref}.${PREFIX}`,
+                        headers: {
+                            DOLAPIKEY: token.token,
+                            Accept: 'application/json',
+                        }
+                    }).begin(async (expectedBytes) => {
+                        expectedBytes__ = expectedBytes;
+                        console.log(`Going to download ${expectedBytes} bytes!`);
 
-        
-        // require the module
-        // var RNFS = require('react-native-fs');
-        // var path = RNFS.DocumentDirectoryPath + '/iScreen/test____.txt';
+                        if (expectedBytes <= 20) {
+                            console.log('Image : ' + i + ' - ' + productList[i].ref + ' => EMPTY [WILL BE DELETED]');
+                            await RNFS.unlink(IMAGE_PATH+'/' + productList[i].ref + '.${PREFIX}');
+                        }
+                    }).done(async () => {
+                        productList[i].image = `${IMAGE_PATH}/${productList[i].ref}.${PREFIX}`;
+                        console.log('Image : ' + i + ' - ' + productList[i].ref + ' => DOWNLOADED');
+                        
+                        // Update image path on device in db
+                        const res = await produitsManager.UPDATE_IMAGE(productList[i]).then(async (value) => {
+                            return await value;
+                        });
 
-        // console.log('FILE WRITTEN! => ', RNFS.CachesDirectoryPath);
-        // console.log('FILE WRITTEN! => ', RNFS.DocumentDirectoryPath);
-        // console.log('FILE WRITTEN! => ', RNFS.DownloadDirectoryPath);
-        // console.log('FILE WRITTEN! => ', RNFS.ExternalDirectoryPath);
-        // console.log('FILE WRITTEN! => ', RNFS.ExternalStorageDirectoryPath);
-        // console.log('FILE WRITTEN! => ', RNFS.ExternalCachesDirectoryPath);
+                        // if((i+1) == lg){
+                        //     console.log("DOWNLOADS DONE P1!");
+                        //     isDone = true;
+                        //     result = true;
+                        // }
+                    }).error(async (error) => {
+                        console.log('error => ', error);
+                        if ((lg - 1) === i) {
+                            result = true;
+                            console.log('telechargement complet');
+                            return await result;
+                        }
+                    });
+                }
 
-        // // write the file
-        // await RNFS.writeFile(path, 'Lorem ipsum dolor sit amet', 'utf8')
-        //     .then(async (success) => {
-        //         console.log('FILE WRITTEN! at => ', path);
-        //     })
-        //     .catch(async (err) => {
-        //         console.log(err.message);
-        // });
-
-        
-        const list___ = await RNFS.readDir(RNFS.DocumentDirectoryPath + "/iScreen/produits/images") // On Android, use "RNFS.DocumentDirectoryPath" (MainBundlePath is not defined)
-        .then(async (result) => {
-            console.log('GOT RESULT : ', result);
-
-            // let dossier;
-            // for(let x = 0; x < result.length; x++){
-            //     if(result[x].name == "iScreen"){
-            //         dossier = result[x];
-            //     }
-            // }
-
-            // stat the first file
-            return await result;
-        })
-        .then(async (statResult) => {
-            console.log('GOT statResult :', statResult[0]);
-
-            if (statResult[0].isFile()) {
-                // if we have a file, read it
-                return await RNFS.readFile(statResult[0].path, 'utf8');
-            }
-
-            return await 'no file';
-        })
-        .then(async (contents) => {
-            // log the file contents
-            console.log('contents : ', contents);
-            return await contents;
-        })
-        .catch(async (err) => {
-            console.log(err.message, err.code);
-        });
-
-        console.log('list___ : ', list___);
+                // let isWait = true;
+                // while(isWait){
+                //     if(isDone){
+                //         console.log("DOWNLOADS DONE P2!");
+                //         isWait = false;
+                //         break;
+                //     }
+                // }
+            });
+        }
 
         return await result;
     }

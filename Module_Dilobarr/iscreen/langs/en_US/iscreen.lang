@@ -1,4 +1,4 @@
-# Copyright (C) 2019 SuperAdmin
+# Copyright (C) 2020 SuperAdmin
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -11,23 +11,23 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #
 # Generic
 #
 
-# Module label 'ModuleiscreenName'
-ModuleiscreenName = iscreen
-# Module description 'ModuleiscreenDesc'
-ModuleiscreenDesc = iscreen description
+# Module label 'ModuleIScreenName'
+ModuleIScreenName = IScreen
+# Module description 'ModuleIScreenDesc'
+ModuleIScreenDesc = IScreen description
 
 #
 # Admin page
 #
-iscreenSetup = iscreen setup
+IScreenSetup = IScreen setup
 Settings = Settings
-iscreenSetupPage = iscreen setup page
+IScreenSetupPage = IScreen setup page
 ISCREEN_MYPARAM1 = My param 1
 ISCREEN_MYPARAM1Tooltip = My param 1 tooltip
 ISCREEN_MYPARAM2=My param 2
@@ -38,8 +38,8 @@ ISCREEN_MYPARAM2Tooltip=My param 2 tooltip
 # About page
 #
 About = About
-iscreenAbout = About iscreen
-iscreenAboutPage = iscreen about page
+IScreenAbout = About IScreen
+IScreenAboutPage = IScreen about page
 
 #
 # Sample page

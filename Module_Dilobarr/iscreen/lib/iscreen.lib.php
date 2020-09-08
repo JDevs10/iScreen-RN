@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2019 SuperAdmin
+/* Copyright (C) 2020 SuperAdmin
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,13 +12,13 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /**
  * \file    iscreen/lib/iscreen.lib.php
  * \ingroup iscreen
- * \brief   Library files with common functions for iscreen
+ * \brief   Library files with common functions for IScreen
  */
 
 /**
@@ -52,7 +52,7 @@ function iscreenAdminPrepareHead()
 	//$this->tabs = array(
 	//	'entity:-tabname:Title:@iscreen:/iscreen/mypage.php?id=__ID__'
 	//); // to remove a tab
-	complete_head_from_modules($conf, $langs, $object, $head, $h, 'iscreen');
+	complete_head_from_modules($conf, $langs, null, $head, $h, 'iscreen');
 
 	return $head;
 }

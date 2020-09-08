@@ -129,6 +129,8 @@ export default class SettingsManager extends Component {
                     var len = results.rows.length;
                     for (let i = 0; i < len; i++) {
                         let row = results.rows.item(i);
+                        console.log('settings => row: ', row);
+
                         const {autoPlay, isShowTittle, isShowDescription, isShowPrice, speed, server, key, modifyDate} = row;
                         settings = {
                             autoPlay: (autoPlay == 1 ? true : false), 
@@ -142,10 +144,10 @@ export default class SettingsManager extends Component {
                         };
                     }
                     console.log('settings: ', settings);
-                    await resolve(settings);
                 });
+                await resolve(settings);
             }).then(async (result) => {
-                await this.closeDatabase(db);
+                // await this.closeDatabase(db);
             }).catch(async (err) => {
                 console.log(err);
                 // await resolve({});
@@ -181,7 +183,7 @@ export default class SettingsManager extends Component {
                     await resolve(settings);
                 });
             }).then(async (result) => {
-                await this.closeDatabase(db);
+                // await this.closeDatabase(db);
             }).catch(async (err) => {
                 console.log(err);
             });
@@ -207,7 +209,7 @@ export default class SettingsManager extends Component {
                     await resolve(check);
                 });
             }).then(async (result) => {
-                await this.closeDatabase(db);
+                // await this.closeDatabase(db);
             }).catch(async (err) => {
                 console.log(err);
                 await resolve(false);

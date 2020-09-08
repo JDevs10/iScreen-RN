@@ -1,5 +1,5 @@
-# CHANGELOG ISCREEN FOR <a href="https://www.dolibarr.org">DOLIBARR ERP CRM</a>
+# CHANGELOG ISCREEN FOR [DOLIBARR ERP CRM](https://www.dolibarr.org)
 
 ## 1.0
-Initial version
 
+Initial version

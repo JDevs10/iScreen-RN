@@ -123,7 +123,7 @@ export default class CategoriesManager extends Component {
             try{
                 for(let x = 0; x < data_.length; x++){
                     await db.transaction(async (tx) => {
-                        const insert = "INSERT INTO " + TABLE_NAME + " ("+COLUMN_ID+", "+COLUMN_Ref+", "+COLUMN_Ref_ext+", "+COLUMN_Label+", "+COLUMN_Description+", "+COLUMN_Entity+", "+COLUMN_Color+", "+COLUMN_Type+", "+COLUMN_Visible+", "+COLUMN_Fk_parent+") VALUES (NULL, '"+data_[x].ref+"', '"+data_[x].ref_ext+"', '"+data_[x].label+"', '"+data_[x].description+"', '"+data_[x].entity+"', '"+data_[x].color+"', '"+data_[x].type+"', '"+data_[x].visible+"', '"+data_[x].fk_parent+"')";
+                        const insert = "INSERT INTO " + TABLE_NAME + " ("+COLUMN_ID+", "+COLUMN_Ref+", "+COLUMN_Ref_ext+", "+COLUMN_Label+", "+COLUMN_Description+", "+COLUMN_Entity+", "+COLUMN_Color+", "+COLUMN_Type+", "+COLUMN_Visible+", "+COLUMN_Fk_parent+") VALUES (NULL, '"+data_[x].ref+"', '"+data_[x].ref_ext+"', '"+data_[x].label.replace(/'/g, "''")+"', '"+data_[x].description.replace(/'/g, "''")+"', '"+data_[x].entity+"', '"+data_[x].color+"', '"+data_[x].type+"', '"+data_[x].visible+"', '"+data_[x].fk_parent+"')";
                         await tx.executeSql(insert, []);
                     });
                 }
@@ -150,11 +150,11 @@ export default class CategoriesManager extends Component {
                         //console.log(`ID: ${row.id}, label: ${row.label}`)
                         categories = row;
                     }
-                    console.log(categories);
+                    //console.log(categories);
                     await resolve(categories);
                 });
             }).then(async (result) => {
-                await this.closeDatabase(db);
+                //await this.closeDatabase(db);
             }).catch(async (err) => {
                 console.log(err);
             });
@@ -185,7 +185,7 @@ export default class CategoriesManager extends Component {
                   await resolve(categories);
                 });
               }).then(async (result) => {
-                await this.closeDatabase(db);
+                //await this.closeDatabase(db);
               }).catch(async (err) => {
                 console.log('err: ', err);
                 await resolve([]);
@@ -206,6 +206,19 @@ export default class CategoriesManager extends Component {
                 console.error('result : ', result);
                 return await resolve(false);
             });
+        });
+    }
+
+    //Delete
+    async DROP_SERVER(){
+        console.log("##### DELETE_SERVER_LIST #########################");
+
+        return await new Promise(async (resolve) => {
+            await db.transaction(async function (txn) {
+                await txn.executeSql('DROP TABLE IF EXISTS ' + TABLE_NAME, []);
+                console.log("table '"+TABLE_NAME+"' Dropped!");
+            });
+            return await resolve(true);
         });
     }
 }

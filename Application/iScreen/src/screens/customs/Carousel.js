@@ -160,23 +160,44 @@ export default class Carousel extends Component {
                         data.map((item, index) => (
                             <TouchableOpacity key={index} onPress={() => this.productSelected(item)}>
                                 <View style={{alignItems: "center", justifyContent: "center", marginTop: 10, marginBottom: 10}}>
-                                    <ImageBackground style={{width: HW.MyDeviceWidth, height: HW.MyDeviceHeight,}} source={require("../../../img/no-img.jpg")}>
+                                    
 
-                                        <View style={{width: (HW.MyDeviceWidth * .9), position: "absolute", padding: 40, top: 0}}>
-                                            {this.state._showTittle ? <Text style={{fontSize: 35, fontWeight: "bold"}}>{item.label}</Text> : null}
-                                            {this.state._showTittle ? <Text style={{width: ((HW.MyDeviceWidth * .9) * 0.25), fontSize: 20}}>{item.description}</Text> : null}     
-                                        </View>
-                                        <View style={{width: (HW.MyDeviceWidth * .9), position: "absolute", padding: 10, bottom: 0, left: (HW.MyDeviceWidth * .6)}}>
-                                            { this.state._showPriceContainer && this.state._showPriceLabel ? 
-                                                <ImageBackground style={{width: DeviceInfo.isTablet() ? 300 : 50, height: DeviceInfo.isTablet() ? 250 : 20, alignItems: "center", justifyContent: "center"}} source={require('../../../img/price-tag.png')}>
-                                                    <Text style={{fontSize: 60, fontWeight: "bold"}}>{parseFloat(item.price) * 100 / 100} €</Text>
-                                                </ImageBackground>
-                                            : null}
-                                            { !this.state._showPriceContainer && this.state._showPriceLabel ? 
-                                                <Text style={{width: DeviceInfo.isTablet() ? 300 : 50, height: DeviceInfo.isTablet() ? 250 : 20, alignItems: "center", justifyContent: "center", fontSize: 60, fontWeight: "bold"}}>{parseFloat(item.price) * 100 / 100} €</Text>
-                                            : null}
-                                        </View>
-                                    </ImageBackground>
+                                    { item.image.length > 0 ? 
+                                        <ImageBackground style={{width: HW.MyDeviceWidth, height: HW.MyDeviceHeight,}} source={{uri: 'file://' +item.image}}>
+                                            <View style={{width: (HW.MyDeviceWidth * .9), position: "absolute", padding: 40, top: 0}}>
+                                                {this.state._showTittle ? <Text style={{fontSize: 35, fontWeight: "bold"}}>{item.label}</Text> : null}
+                                                {this.state._showTittle ? <Text style={{width: ((HW.MyDeviceWidth * .9) * 0.25), fontSize: 20}}>{item.description}</Text> : null}     
+                                            </View>
+                                            <View style={{width: (HW.MyDeviceWidth * .9), position: "absolute", padding: 10, bottom: 0, left: (HW.MyDeviceWidth * .6)}}>
+                                                { this.state._showPriceContainer && this.state._showPriceLabel ? 
+                                                    <ImageBackground style={{width: DeviceInfo.isTablet() ? 300 : 50, height: DeviceInfo.isTablet() ? 250 : 20, alignItems: "center", justifyContent: "center"}} source={require('../../../img/price-tag.png')}>
+                                                        <Text style={{fontSize: 60, fontWeight: "bold"}}>{parseFloat(item.price) * 100 / 100} €</Text>
+                                                    </ImageBackground>
+                                                : null}
+                                                { !this.state._showPriceContainer && this.state._showPriceLabel ? 
+                                                    <Text style={{width: DeviceInfo.isTablet() ? 300 : 50, height: DeviceInfo.isTablet() ? 250 : 20, alignItems: "center", justifyContent: "center", fontSize: 60, fontWeight: "bold"}}>{parseFloat(item.price) * 100 / 100} €</Text>
+                                                : null}
+                                            </View>
+                                        </ImageBackground>
+                                    :
+                                        <ImageBackground style={{width: HW.MyDeviceWidth, height: HW.MyDeviceHeight,}} source={require("../../../img/no-img.jpg")}>
+
+                                            <View style={{width: (HW.MyDeviceWidth * .9), position: "absolute", padding: 40, top: 0}}>
+                                                {this.state._showTittle ? <Text style={{fontSize: 35, fontWeight: "bold"}}>{item.label}</Text> : null}
+                                                {this.state._showTittle ? <Text style={{width: ((HW.MyDeviceWidth * .9) * 0.25), fontSize: 20}}>{item.description}</Text> : null}     
+                                            </View>
+                                            <View style={{width: (HW.MyDeviceWidth * .9), position: "absolute", padding: 10, bottom: 0, left: (HW.MyDeviceWidth * .6)}}>
+                                                { this.state._showPriceContainer && this.state._showPriceLabel ? 
+                                                    <ImageBackground style={{width: DeviceInfo.isTablet() ? 300 : 50, height: DeviceInfo.isTablet() ? 250 : 20, alignItems: "center", justifyContent: "center"}} source={require('../../../img/price-tag.png')}>
+                                                        <Text style={{fontSize: 60, fontWeight: "bold"}}>{parseFloat(item.price) * 100 / 100} €</Text>
+                                                    </ImageBackground>
+                                                : null}
+                                                { !this.state._showPriceContainer && this.state._showPriceLabel ? 
+                                                    <Text style={{width: DeviceInfo.isTablet() ? 300 : 50, height: DeviceInfo.isTablet() ? 250 : 20, alignItems: "center", justifyContent: "center", fontSize: 60, fontWeight: "bold"}}>{parseFloat(item.price) * 100 / 100} €</Text>
+                                                : null}
+                                            </View>
+                                        </ImageBackground>
+                                    }
                                 </View>
                             </TouchableOpacity>
                         ))
