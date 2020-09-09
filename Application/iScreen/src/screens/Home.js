@@ -34,6 +34,8 @@ export default class Home extends Component {
             notif: '....',
             settings: {},
             data: [],
+            productIdFrom: 1,
+            productIdTo: 40,
             oldSettings: {},
             orientation: isPortrait() ? 'portrait' : 'landscape',
         };
@@ -69,8 +71,8 @@ export default class Home extends Component {
         this.setState({notif: "Chargement des données...."})
         const produitsManager = new ProduitsManager();
         await produitsManager.initDB();
-        await produitsManager.GET_LIST_LIMIT(30).then(async (data_) => {
-            console.log('produitsManager.GET_LIST_LIMIT(30) : ');
+        await produitsManager.GET_LIST_BETWEEN(this.state.productIdFrom, this.state.productIdTo).then(async (data_) => {
+            console.log('produitsManager.GET_LIST_BETWEEN('+this.state.productIdFrom+', '+this.state.productIdTo+') : ');
             console.log(data_.length);
             this.setState({
                 data: data_
@@ -109,6 +111,22 @@ export default class Home extends Component {
         return _settings
     }
 
+    async _onUpdateData(data) {
+        console.log('data : ', data);
+        this.setState({data: []});
+
+        this.setState({notif: "Chargement des données...."})
+        const produitsManager = new ProduitsManager();
+        await produitsManager.initDB();
+        await produitsManager.GET_LIST_BETWEEN(data.from, data.to).then(async (data_) => {
+            console.log('produitsManager.GET_LIST_LIMIT_NoVirtualProducts(30) : ');
+            console.log(data_.length);
+            this.setState({
+                data: data_
+            });
+        });
+    }
+
     render() {
         const MyDeviceWidth = Dimensions.get('window').width;
         const MyDeviceHeight = Dimensions.get('window').height;
@@ -127,7 +145,7 @@ export default class Home extends Component {
                 {/* <Header navigation={ this.props } /> */}
                 { this.state.data.length > 0 ? null : <Text>{this.state.notif}</Text> }
                 { this.state.data.length > 0 ? 
-                    <Carousel settings={this.state.settings} data={this.state.data} HW={{MyDeviceWidth: MyDeviceWidth, MyDeviceHeight: (MyDeviceHeight-50)}}/>
+                    <Carousel onDataUpdate={this._onUpdateData.bind(this)} settings={this.state.settings} data={this.state.data} HW={{MyDeviceWidth: MyDeviceWidth, MyDeviceHeight: (MyDeviceHeight-50)}}/>
                 :
                     null
                 }

@@ -105,6 +105,12 @@ export default class Carousel extends Component {
     autoScroll(){
         if(this.autoPlay && this.state._autoPlay){
             myInterval = setInterval(() => {
+                if(this.state.selectedIndex == (this.props.data.length - 1)){
+                    this.props.onDataUpdate({from: this.props.data[this.props.data.length - 1].id, to: this.props.data[this.props.data.length - 1].id + 40});
+                    setTimeout(() => {
+                        console.log('TimeOut => 2s');
+                      }, 2000);
+                }
                 this.setState(prev => ({selectedIndex: prev.selectedIndex === (this.props.data.length - 1) ? 0 : (prev.selectedIndex + 1)}), () => {
                     this.scrollRef.current.scrollTo({
                         animated: true,

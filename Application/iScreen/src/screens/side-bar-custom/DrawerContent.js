@@ -54,6 +54,16 @@ export default class DrawerContent extends Component {
             await ProduitsManager_.initDB();
             await ProduitsManager_.DROP_SERVER();
 
+            const RNFS = require('react-native-fs');
+            const IMAGE_PATH = RNFS.DocumentDirectoryPath + '/iScreen/produits/images';
+            await RNFS.unlink(IMAGE_PATH)
+                .then(async () => {
+                    console.log('OLD Repertory deleted');
+                })
+                .catch(async (err) => {
+                    console.log(err.message);
+                });
+
             BackHandler.exitApp();
         }else{
             console.log('Cancel Pressed');
@@ -106,8 +116,8 @@ export default class DrawerContent extends Component {
                                     size={50}
                                 />
                                 <View style={{marginLeft:15, flexDirection:'column'}}>
-                                    <Title style={styles.title}>John Doe</Title>
-                                    <Caption style={styles.caption}>@j_doe</Caption>
+                                    <Title style={styles.title}>iScreen</Title>
+                                    {/* <Caption style={styles.caption}>@j_doe</Caption> */}
                                 </View>
                             </View>
 
@@ -125,7 +135,7 @@ export default class DrawerContent extends Component {
                                 label="Affiche"
                                 onPress={() => {this.props.navigation.navigate('Home')}}
                             />
-                            <DrawerItem 
+                            {/* <DrawerItem 
                                 // icon={({color, size}) => (
                                 //     <Icon 
                                 //     name="account-outline" 
@@ -135,7 +145,7 @@ export default class DrawerContent extends Component {
                                 // )}
                                 label="Téléchargement des Images"
                                 onPress={() => {this.download_images_alert()}}
-                            />
+                            /> */}
                             <DrawerItem 
                                 // icon={({color, size}) => (
                                 //     <Icon 

@@ -193,6 +193,41 @@ export default class ProduitsManager extends Component {
     }
 
     // get all
+    async GET_LIST_NoVirtualProducts(){
+        console.log("##### GET_LIST[Products] #########################");
+
+        return await new Promise(async (resolve) => {
+            const products = [];
+            await db.transaction(async (tx) => {
+                await tx.executeSql("SELECT p.id, p.ref, p.label, p.description, p.price, p.image FROM products p where p.ref NOT LIKE 'C%' AND p.ref NOT LIKE 'P%'", []).then(async ([tx,results]) => {
+                    console.log("Query completed");
+                    var len = results.rows.length;
+                    for (let i = 0; i < len; i++) {
+                        let row = results.rows.item(i);
+                        //console.log(`ID: ${row.id}, label: ${row.label}`)
+                        const { id, ref, label, description, price, image } = row;
+                        products.push({
+                            id,
+                            ref,
+                            label,
+                            description,
+                            price,
+                            image
+                        });
+                    }
+                    // console.log(products);
+                    await resolve(products);
+                });
+            }).then(async (result) => {
+                //await this.closeDatabase(db);
+            }).catch(async (err) => {
+                console.log('err: ', err);
+                await resolve([]);
+            });
+        });
+    }
+
+    // get all
     async GET_LIST_LIMIT(limit){
         console.log("##### GET_LIST[Products] #########################");
 
@@ -200,6 +235,76 @@ export default class ProduitsManager extends Component {
             const products = [];
             await db.transaction(async (tx) => {
                 await tx.executeSql('SELECT p.id, p.ref, p.label, p.description, p.price, p.image FROM products p LIMIT '+limit, []).then(async ([tx,results]) => {
+                    console.log("Query completed");
+                    var len = results.rows.length;
+                    for (let i = 0; i < len; i++) {
+                        let row = results.rows.item(i);
+                        //console.log(`ID: ${row.id}, label: ${row.label}`)
+                        const { id, ref, label, description, price, image } = row;
+                        products.push({
+                            id,
+                            ref,
+                            label,
+                            description,
+                            price,
+                            image
+                        });
+                    }
+                    // console.log(products);
+                    await resolve(products);
+                });
+            }).then(async (result) => {
+                //await this.closeDatabase(db);
+            }).catch(async (err) => {
+                console.log('err: ', err);
+                await resolve([]);
+            });
+        });
+    }
+
+    // get all
+    async GET_LIST_LIMIT_NoVirtualProducts(limit){
+        console.log("##### GET_LIST[Products] #########################");
+
+        return await new Promise(async (resolve) => {
+            const products = [];
+            await db.transaction(async (tx) => {
+                await tx.executeSql("SELECT p.id, p.ref, p.label, p.description, p.price, p.image FROM products p where p.ref NOT LIKE 'C%' AND p.ref NOT LIKE 'P%' LIMIT "+limit, []).then(async ([tx,results]) => {
+                    console.log("Query completed");
+                    var len = results.rows.length;
+                    for (let i = 0; i < len; i++) {
+                        let row = results.rows.item(i);
+                        //console.log(`ID: ${row.id}, label: ${row.label}`)
+                        const { id, ref, label, description, price, image } = row;
+                        products.push({
+                            id,
+                            ref,
+                            label,
+                            description,
+                            price,
+                            image
+                        });
+                    }
+                    // console.log(products);
+                    await resolve(products);
+                });
+            }).then(async (result) => {
+                //await this.closeDatabase(db);
+            }).catch(async (err) => {
+                console.log('err: ', err);
+                await resolve([]);
+            });
+        });
+    }
+
+    // get all
+    async GET_LIST_BETWEEN(from, to){
+        console.log("##### GET_LIST_BETWEEN[Products] #########################");
+
+        return await new Promise(async (resolve) => {
+            const products = [];
+            await db.transaction(async (tx) => {
+                await tx.executeSql('SELECT p.id, p.ref, p.label, p.description, p.price, p.image FROM products p WHERE p.id BETWEEN ' + from + ' AND ' + to, []).then(async ([tx,results]) => {
                     console.log("Query completed");
                     var len = results.rows.length;
                     for (let i = 0; i < len; i++) {

@@ -16,6 +16,39 @@ export default class CheckData extends Component {
             await produitsManager.initDB();
             const pm = await produitsManager.GET_LIST();
 
+            const RNFS = require('react-native-fs');
+            // get a list of files and directories in the main bundle
+            await RNFS.readDir(RNFS.DocumentDirectoryPath + '/iScreen/produits/images')
+                .then((result) => {
+                    const paths = [];
+
+                    for(let index = 0; index < result.length; index++){
+                        paths.push({uri: result[index].path});
+                    }
+                    console.log('GOT RESULT : ', paths);
+            
+                    // stat the first file
+                    return paths;
+                })
+                .then((statResult) => {
+                    console.log('GOT statResult : ', statResult.length);
+                    
+                    if(statResult.length > 0){
+                        isChecked.push(true);
+                    }else{
+                        isChecked.push(false);
+                    }
+            
+                    return 'no file';
+                })
+                .then((contents) => {
+                    // log the file contents
+                    console.log('NOT reading contents!');
+                })
+                .catch((err) => {
+                    console.log(err.message, err.code);
+                });
+
             console.log('cm size => ' + cm.length);
             console.log('pm size => ' + pm.length);
 

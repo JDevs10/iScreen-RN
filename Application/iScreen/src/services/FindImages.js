@@ -43,9 +43,8 @@ export default class FindImages extends Component {
                     console.log(err.message);
                 });
             await RNFS.mkdir(IMAGE_PATH).then(async (success) => {
-                let isDone = false;
                 let lg = productList.length;
-                for (let i = (lg-150); i < lg; i++) {
+                for (let i = (lg-20); i < lg; i++) {
                     let expectedBytes__ = 0;
                     console.log(`url => ${token.server}/api/ryimg/product_v2.php?server=${token.server}&DOLAPIKEY=${token.token}&modulepart=product&ref=${productList[i].ref}`);
 
@@ -74,11 +73,11 @@ export default class FindImages extends Component {
                             return await value;
                         });
 
-                        // if((i+1) == lg){
-                        //     console.log("DOWNLOADS DONE P1!");
-                        //     isDone = true;
-                        //     result = true;
-                        // }
+                        console.log("i => " +(i+1) +" == "+lg);
+                        if((i+1) == lg){
+                            console.log("DOWNLOADS DONE P1!");
+                            return await true;
+                        }
                     }).error(async (error) => {
                         console.log('error => ', error);
                         if ((lg - 1) === i) {
@@ -88,15 +87,6 @@ export default class FindImages extends Component {
                         }
                     });
                 }
-
-                // let isWait = true;
-                // while(isWait){
-                //     if(isDone){
-                //         console.log("DOWNLOADS DONE P2!");
-                //         isWait = false;
-                //         break;
-                //     }
-                // }
             });
         }
 
