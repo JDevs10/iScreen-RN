@@ -155,7 +155,6 @@ class Download extends Component {
       return await val;
     });
 
-
     await setTimeout(async () => {
       this.setState({
         ...this.state,
@@ -163,91 +162,17 @@ class Download extends Component {
       });
     }, 3000);
 
-    
-
-    const RNFS = require('react-native-fs');
-    const IMAGE_PATH = RNFS.DocumentDirectoryPath + '/iScreen/produits/images';
-    const PREFIX = "jpg";
-
-    const produitsManager = new ProduitsManager();
-    await produitsManager.initDB();
-    
-    // get a list of products
-    const productList = await produitsManager.GET_LIST().then(async (value) => {
-        return await value;
+    console.log('findImages');
+    const findImages = new FindImages();
+    const res_3 = await findImages.getAllProduitsImagesFromServer(token).then(async (val) => {
+      console.log('findImages.getAllProduitsImagesFromServer : ', val);
+      return await val;
     });
-    console.log("productList => "+productList.length);
     
-    if(productList.length > 0){
-        // get image from server
-        // and save on devices then update image file location in db
-        
-        console.log('IMAGE_PATH : ', IMAGE_PATH);
-        
-        await RNFS.unlink(IMAGE_PATH)
-            .then(async () => {
-                console.log('OLD Repertory deleted');
-            })
-            .catch(async (err) => {
-                console.log(err.message);
-            });
-        await RNFS.mkdir(IMAGE_PATH).then(async (success) => {
-            let lg = productList.length;
-            for (let i = 0; i < lg; i++) {
-                let expectedBytes__ = 0;
-                console.log(`i => ${(i+1)} | url => ${token.server}/api/ryimg/product_v2.php?server=${token.server}&DOLAPIKEY=${token.token}&modulepart=product&ref=${productList[i].ref}`);
 
-                await RNBackgroundDownloader.download({
-                    id: String(i),
-                    url: `${token.server}/api/ryimg/product_v2.php?server=${token.server}&DOLAPIKEY=${token.token}&modulepart=product&ref=${productList[i].ref}`,
-                    destination: `${IMAGE_PATH}/${productList[i].ref}.${PREFIX}`,
-                    headers: {
-                        DOLAPIKEY: token.token,
-                        Accept: 'application/json',
-                    }
-                }).begin(async (expectedBytes) => {
-                    expectedBytes__ = expectedBytes;
-                    console.log(`Going to download ${expectedBytes} bytes!`);
-
-                    if (expectedBytes <= 20) {
-                        console.log('Image : ' + i + ' - ' + productList[i].ref + ' => EMPTY [WILL BE DELETED]');
-                        await RNFS.unlink(IMAGE_PATH+'/' + productList[i].ref + '.${PREFIX}');
-                    }
-                }).done(async () => {
-                    productList[i].image = `${IMAGE_PATH}/${productList[i].ref}.${PREFIX}`;
-                    console.log('Image : ' + i + ' - ' + productList[i].ref + ' => DOWNLOADED');
-                    
-                    // Update image path on device in db
-                    const res = await produitsManager.UPDATE_IMAGE(productList[i]).then(async (value) => {
-                        return await value;
-                    });
-
-                    console.log("i => " +(i+1) +" == "+lg);
-                    this.setState({loadingNotify: "Téléchargement des images terminé... "+(i+1)+"/"+lg});
-
-                    if((i+1) == lg){
-                        console.log("DOWNLOADS DONE P1!");
-                        
-                        setTimeout(() => {
-                          this.props.navigation.navigate('home');
-                          return;
-                        }, 2500);
-                    }
-                }).error(async (error) => {
-                    console.log('error => ', error);
-                    if ((lg - 1) === i) {
-                        result = true;
-                        console.log('telechargement complet');
-                        return await result;
-                    }
-                });
-            }
-        });
-    }
-    
-    /*
     await res.push(res_1);
     await res.push(res_2);
+    await res.push(res_3);
 
     let res_ = false;
     for(let x = 0; x < res.length; x++){
@@ -259,38 +184,17 @@ class Download extends Component {
     }
 
     if(res_ == true){
-      /*
       setTimeout(() => {
         this.props.navigation.navigate('home');
         return;
       }, 2500);
-      * /
     }else{
       this.setState({
         ...this.state,
         loadingNotify: "Le serveur Big Data Consulting n'est pas joignable..."
       });
-
-      const SettingsManager_ = new SettingsManager();
-      await SettingsManager_.initDB();
-      await SettingsManager_.DROP_SERVER();
-
-      const ServerManagement_ = new ServerManagement();
-      await ServerManagement_.initDB();
-      await ServerManagement_.DROP_SERVER();
-
-      const CategoriesManager_ = new CategoriesManager();
-      await CategoriesManager_.initDB();
-      await CategoriesManager_.DROP_SERVER();
-
-      const ProduitsManager_ = new ProduitsManager();
-      await ProduitsManager_.initDB();
-      await ProduitsManager_.DROP_SERVER();
-
       alert("Le serveur Big Data Consulting n'est pas joignable...");
-      
     }
-    */
   }
 
   render() {
